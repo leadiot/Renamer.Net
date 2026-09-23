@@ -1,14 +1,16 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 using System.Globalization;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
     /// <summary>
-    /// 时间信息。
-    /// 语法：|"[source][:format]
-    /// source 缺省为当前时间；c=创建时间、m=修改时间、a=访问时间。
-    /// 来源标记仅在“单独出现”或“紧跟 :”时才被识别，因此自定义格式必须写在 : 之后，
-    /// 例如 |"c:yyyy-MM-dd、|":yyyy-MM-dd。缺省格式为 yyyyMMddHHmmss。
+    /// 时间信息。语法：|"[body]
+    /// |"                    当前时间，缺省格式
+    /// |"c | |"m | |"a       创建/修改/访问时间，缺省格式
+    /// |"c:format            指定来源 + 格式
+    /// |":format | |"format  当前时间 + 格式（裸格式时单字符 c/m/a 会被识别为来源标记，
+    ///                       因此格式恰好为 c/m/a 时请使用带 ':' 的写法）
+    /// 缺省格式为 yyyyMMddHHmmss。
     /// </summary>
     internal class TimePattern : RenamerPattern
     {
@@ -49,23 +51,30 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
 
             int i = 0;
-            // 来源标记：单独出现，或后面紧跟 ':'
-            if ((rest.Length == 1 || rest[1] == PATTERN_SPLIT) && TryParseSource(rest[0], out SourceEnum source))
+            // 1) 来源标记单独出现：|"c
+            if (rest.Length == 1 && TryParseSource(rest[0], out SourceEnum onlySource))
             {
-                Source = source;
-                i = 1;
-                if (i == rest.Length)
-                {
-                    return;
-                }
-            }
-            else if (rest[0] != PATTERN_SPLIT)
-            {
-                throw new TemplateParseException(
-                    "无法识别的时间来源（c 创建、m 修改、a 访问），自定义格式前请加 :", bodyPos + PATTERN_TIME.Length);
+                Source = onlySource;
+                return;
             }
 
-            TemplateParser.ExpectChar(rest, ref i, PATTERN_SPLIT, bodyPos + PATTERN_TIME.Length);
+            // 2) 来源标记 + ':' + 格式：|"c:yyyy-MM-dd
+            if (rest.Length > 1 && rest[1] == PATTERN_SPLIT && TryParseSource(rest[0], out SourceEnum withSource))
+            {
+                Source = withSource;
+                i = 2;
+            }
+            else if (rest[0] == PATTERN_SPLIT)
+            {
+                // 3) 仅格式（当前时间）：|":yyyy-MM-dd
+                i = 1;
+            }
+            else
+            {
+                // 4) 裸格式（当前时间）：|"yyyy-MM-dd；单字符 c/m/a 已在分支 1 处理
+                i = 0;
+            }
+
             Format = rest.Substring(i);
             if (Format.Length == 0)
             {

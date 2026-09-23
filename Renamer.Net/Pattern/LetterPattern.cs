@@ -8,6 +8,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// <summary>
     /// 字母/字符序列。
     /// 语法：
+    /// |?                                缺省小写字母序列（等价 |?/）
     /// |?/[length][:start[:step]]       小写字母序列（a-z 为字符集，左侧补 a）
     /// |?\[length][:start[:step]]       大写字母序列（A-Z 为字符集，左侧补 A）
     /// |?charset[:length:start:step]    自定义字符集，charset 取到第一个 ':' 为止
@@ -61,13 +62,17 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
 
             int i = PATTERN_LETTER.Length;
-            if (i >= body.Length)
-            {
-                throw new TemplateParseException("字母序列表达式缺少字符集或大小写标记", bodyPos + i);
-            }
-
             Start = 0;
             Step = 1;
+
+            // 裸 |? 缺省按小写字母序列处理
+            if (i >= body.Length)
+            {
+                IsUpper = false;
+                Letters = null;
+                Title = "小写字母序列";
+                return;
+            }
 
             if (body[i] == PATTERN_OPT_LOWER || body[i] == PATTERN_OPT_UPPER)
             {

@@ -35,9 +35,19 @@ namespace Com.Scm.Renamer
         public DateTime LastAccessTime { get; set; } = DateTime.Now;
 
         /// <summary>
-        /// 最终名称
+        /// 最终名称（AutoSuffix 消解冲突后为消解后的名称）
         /// </summary>
         public string DstName { get; set; }
+
+        /// <summary>
+        /// 预览/提交状态
+        /// </summary>
+        public RenameStatus Status { get; set; } = RenameStatus.Ok;
+
+        /// <summary>
+        /// 状态说明（自动消解说明或错误描述）
+        /// </summary>
+        public string IssueMessage { get; set; }
 
         /// <summary>
         /// 错误代码
