@@ -1,4 +1,4 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 using Com.Scm.Renamer.Pattern;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
@@ -25,6 +25,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         {
             Type = PatternType.Suffix;
             Title = "文件后缀";
+            IsExtension = true;
         }
 
         private int _Option;

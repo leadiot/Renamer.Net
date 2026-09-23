@@ -1,0 +1,223 @@
+using Com.Scm.Filexp.Rename.Dvo;
+using Com.Scm.Filexp.Rename.Dvo.Pattern;
+using Com.Scm.Renamer.Pattern;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
+namespace Com.Scm.Renamer
+{
+    /// <summary>
+    /// 模板解析错误。Position 为出错字符在整个模板中的 0 基位置。
+    /// </summary>
+    public class TemplateParseException : Exception
+    {
+        /// <summary>
+        /// 出错位置（0 基）
+        /// </summary>
+        public int Position { get; }
+
+        public TemplateParseException(string message, int position)
+            : base(message)
+        {
+            Position = position;
+        }
+    }
+
+    /// <summary>
+    /// 模板解析器：把模板扫描为“字面量 + 表达式”的 AST 片段列表。
+    /// 表达式定界符 &lt; &gt; 是 Windows 文件名字符，天然不会出现在生成结果中，
+    /// 因此只需找到成对的 &lt; &gt;，不支持嵌套。
+    /// </summary>
+    public static class TemplateParser
+    {
+        /// <summary>
+        /// 解析模板，返回按顺序排列的表达式片段。
+        /// </summary>
+        public static List<RenamerPattern> Parse(string template)
+        {
+            var segments = new List<RenamerPattern>();
+            if (string.IsNullOrEmpty(template))
+            {
+                return segments;
+            }
+
+            int literalStart = 0;
+            int i = 0;
+            while (i < template.Length)
+            {
+                if (template[i] != RenamerPattern.PATTERN_START)
+                {
+                    i++;
+                    continue;
+                }
+
+                // 先结算字面量
+                if (i > literalStart)
+                {
+                    segments.Add(CreateText(template.Substring(literalStart, i - literalStart)));
+                }
+
+                int end = template.IndexOf(RenamerPattern.PATTERN_END, i + 1);
+                if (end < 0)
+                {
+                    throw new TemplateParseException("表达式缺少结束符 >", i);
+                }
+
+                string body = template.Substring(i + 1, end - i - 1);
+                segments.Add(ParseExpression(body, i + 1, template.Substring(i, end - i + 1)));
+
+                i = end + 1;
+                literalStart = i;
+            }
+
+            if (literalStart < template.Length)
+            {
+                segments.Add(CreateText(template.Substring(literalStart)));
+            }
+
+            return segments;
+        }
+
+        private static TextPattern CreateText(string text)
+        {
+            return new TextPattern
+            {
+                Text = text,
+                Pattern = text
+            };
+        }
+
+        private static RenamerPattern ParseExpression(string body, int bodyPos, string raw)
+        {
+            if (body.Length == 0)
+            {
+                throw new TemplateParseException("表达式内容为空", bodyPos);
+            }
+
+            RenamerPattern pattern;
+            char first = body[0];
+
+            if (first == RenamerPattern.PATTERN_PREFIX[0])
+            {
+                var p = new NamePrefixPattern();
+                p.DecodeBody(body, bodyPos);
+                pattern = p;
+            }
+            else if (first == RenamerPattern.PATTERN_SUFFIX[0])
+            {
+                var p = new NameSuffixPattern();
+                p.DecodeBody(body, bodyPos);
+                pattern = p;
+            }
+            else if (first == RenamerPattern.PATTERN_ESCAPE)
+            {
+                if (body.Length < 2)
+                {
+                    throw new TemplateParseException("表达式类型不完整（|* 数字、|? 字母、|\" 时间）", bodyPos);
+                }
+
+                switch (body[1])
+                {
+                    case '*':
+                        {
+                            var p = new NumberPattern();
+                            p.DecodeBody(body, bodyPos);
+                            pattern = p;
+                            break;
+                        }
+                    case '?':
+                        {
+                            var p = new LetterPattern();
+                            p.DecodeBody(body, bodyPos);
+                            pattern = p;
+                            break;
+                        }
+                    case '"':
+                        {
+                            var p = new TimePattern();
+                            p.DecodeBody(body, bodyPos);
+                            pattern = p;
+                            break;
+                        }
+                    default:
+                        throw new TemplateParseException(
+                            "无法识别的表达式类型（|* 数字、|? 字母、|\" 时间）", bodyPos + 1);
+                }
+            }
+            else
+            {
+                throw new TemplateParseException(
+                    "表达式必须以 *、?、| 开头：" + body, bodyPos);
+            }
+
+            pattern.Pattern = raw;
+            return pattern;
+        }
+
+        /// <summary>
+        /// 读取非负整数（连续数字）
+        /// </summary>
+        internal static long ReadDigits(string s, ref int i, int basePos, string what)
+        {
+            int start = i;
+            while (i < s.Length && char.IsDigit(s[i]))
+            {
+                i++;
+            }
+            if (i == start)
+            {
+                throw new TemplateParseException("缺少" + what, basePos + i);
+            }
+
+            if (!long.TryParse(s.Substring(start, i - start), NumberStyles.None,
+                CultureInfo.InvariantCulture, out long value))
+            {
+                throw new TemplateParseException(what + "数值超出范围", basePos + start);
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// 读取带符号整数（允许负号）
+        /// </summary>
+        internal static long ReadSignedInt(string s, ref int i, int basePos, string what)
+        {
+            int start = i;
+            if (i < s.Length && s[i] == '-')
+            {
+                i++;
+            }
+
+            long value = ReadDigits(s, ref i, basePos, what);
+            if (start < i && s[start] == '-')
+            {
+                value = -value;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// 要求当前位置为指定字符并跳过
+        /// </summary>
+        internal static void ExpectChar(string s, ref int i, char expected, int basePos)
+        {
+            if (i >= s.Length || s[i] != expected)
+            {
+                throw new TemplateParseException("应为 '" + expected + "'", basePos + i);
+            }
+            i++;
+        }
+
+        /// <summary>
+        /// 要求表达式已读取到末尾
+        /// </summary>
+        internal static void RequireEnd(string s, int i, int basePos)
+        {
+            if (i < s.Length)
+            {
+                throw new TemplateParseException("表达式存在无法识别的尾部内容：" + s.Substring(i), basePos + i);
+            }
+        }
+    }
+}

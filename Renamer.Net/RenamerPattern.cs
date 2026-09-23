@@ -71,15 +71,35 @@ namespace Com.Scm.Filexp.Rename.Dvo
         /// </summary>
         public const string PATTERN_LETTER = "|?";
         /// <summary>
-        /// 预留
+        /// 时间表达式前缀
         /// </summary>
         public const string PATTERN_TIME = "|\"";
+        /// <summary>
+        /// 当前时间（无来源标记，&lt;|"&gt;）
+        /// </summary>
+        public const string PATTERN_TIME_CURRENT = "|\"";
+        /// <summary>
+        /// 文件创建时间（&lt;|"c&gt;）
+        /// </summary>
+        public const string PATTERN_TIME_CREATE = "|\"c";
+        /// <summary>
+        /// 文件修改时间（&lt;|"m&gt;）
+        /// </summary>
+        public const string PATTERN_TIME_MODIFY = "|\"m";
+        /// <summary>
+        /// 文件访问时间（&lt;|"a&gt;）
+        /// </summary>
+        public const string PATTERN_TIME_ACCESS = "|\"a";
+        /// <summary>
+        /// 时间默认展示格式
+        /// </summary>
+        public const string PATTERN_TIME_DEFAULT_FORMAT = "yyyyMMddHHmmss";
 
-        public PatternType Type { get; protected set; }
+        public PatternType Type { get; protected internal set; }
 
-        public string Title { get; protected set; }
+        public string Title { get; protected internal set; }
 
-        public string Pattern { get; protected set; }
+        public string Pattern { get; protected internal set; }
 
         /// <summary>
         /// 表达式生成
@@ -97,10 +117,13 @@ namespace Com.Scm.Filexp.Rename.Dvo
             return true;
         }
 
+        /// <summary>
+        /// 按表达式生成名称片段并追加到 DstName。
+        /// 每个表达式只负责追加自己的输出，返回 false 或抛异常表示求值失败。
+        /// </summary>
         public virtual bool GenName(FileItem item)
         {
-            item.DstName += "";
-            return false;
+            return true;
         }
 
         protected string ToPattern(string pattern)

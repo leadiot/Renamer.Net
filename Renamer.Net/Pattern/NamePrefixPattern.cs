@@ -1,4 +1,4 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 using Com.Scm.Renamer.Pattern;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
@@ -25,6 +25,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         {
             Type = PatternType.Prefix;
             Title = "文件前缀";
+            IsExtension = false;
         }
 
         private int _Option;
@@ -37,19 +38,6 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             set
             {
                 _Option = value;
-            }
-        }
-
-        private int _Length;
-        public int Length
-        {
-            get
-            {
-                return _Length;
-            }
-            set
-            {
-                _Length = value;
             }
         }
 

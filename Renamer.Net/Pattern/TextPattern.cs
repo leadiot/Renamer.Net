@@ -1,4 +1,4 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
@@ -18,6 +18,12 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         public override void Encode()
         {
             Pattern = Text;
+        }
+
+        public override bool GenName(FileItem item)
+        {
+            item.DstName += Text ?? string.Empty;
+            return true;
         }
     }
 }
