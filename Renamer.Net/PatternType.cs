@@ -1,6 +1,6 @@
 namespace Com.Scm.Renamer
 {
-    internal enum PatternType
+    public enum PatternType
     {
         None,
         /// <summary>

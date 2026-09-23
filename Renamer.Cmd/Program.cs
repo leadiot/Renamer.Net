@@ -18,10 +18,11 @@ namespace Com.Scm.Renamer
             Console.WriteLine("==============================================================");
             Console.WriteLine("           文件批量重命名工具（表达式驱动）");
             Console.WriteLine("==============================================================");
-            Console.WriteLine("表达式示例：IMAGE<|*4>-<*>.<?>" +
-                              "   <*|lower|rep:abc:XYZ>.<?>" +
-                              "   <|\"c:yyyyMMdd>_<*>.<?>");
-            Console.WriteLine("             <*><.><?>（无扩展名文件不产生尾随点）");
+            Console.WriteLine("表达式示例：");
+            Console.WriteLine("    IMAGE<|*4>-<*>.<?>");
+            Console.WriteLine("    <*|lower|rep:abc:XYZ>.<?>");
+            Console.WriteLine("    <|\"c:yyyyMMdd>_<*>.<?>");
+            Console.WriteLine("    <*><.><?>（无扩展名文件不产生尾随点）");
             Console.WriteLine("输入 q 可随时退出。");
             Console.WriteLine();
 
@@ -185,19 +186,23 @@ namespace Com.Scm.Renamer
                 switch (item.Status)
                 {
                     case RenameStatus.Ok:
-                        Console.WriteLine("  {0}  ->  {1}", src, dst);
+                        Console.WriteLine("  " + src);
+                        Console.WriteLine("    ->  " + dst);
                         break;
                     case RenameStatus.NoChange:
-                        Console.WriteLine("  {0}  ==  （无变化，跳过）", src);
+                        Console.WriteLine("  " + src);
+                        Console.WriteLine("    ==  （无变化，跳过）");
                         break;
                     case RenameStatus.Resolved:
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("  {0}  ->  {1}  [已自动消解冲突]", src, dst);
+                        Console.WriteLine("  " + src);
+                        Console.WriteLine("    ->  {0}  [已自动消解冲突]", dst);
                         Console.ResetColor();
                         break;
                     case RenameStatus.Error:
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("  {0}  ->  [错误] {1}", src, item.IssueMessage);
+                        Console.WriteLine("  " + src);
+                        Console.WriteLine("    ->  [错误] {0}", item.IssueMessage);
                         Console.ResetColor();
                         break;
                 }
