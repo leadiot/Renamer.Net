@@ -1,4 +1,4 @@
-﻿using Com.Scm.Filexp.Rename.Dvo;
+using Com.Scm.Filexp.Rename.Dvo;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,7 +11,7 @@ namespace Com.Scm.Renamer.Pattern
     /// 一、旧式单操作语法（body 为 &lt; &gt; 内部文本）：
     /// <code>
     /// * | ?                                  原样输出
-    /// |\、|/（兼容 \\、//）                   转大写/小写
+    /// |\、|/                                 转大写/小写（唯一形式）
     /// 文本|文本                               全部替换（区分大小写）
     /// \i\zz、/i\zz                            左起/右起第 i 位后插入 zz
     /// \i/l、/i/l                              左起/右起第 i 位后向右删除 l 个字符
@@ -109,20 +109,28 @@ namespace Com.Scm.Renamer.Pattern
                 return;
             }
 
-            // 大小写转换：规范形式 |\、|/；兼容旧文档的双写 \\、//
-            if (rest == PATTERN_ESCAPE + PATTERN_OPT_UPPER.ToString() ||
-                rest == PATTERN_OPT_UPPER.ToString() + PATTERN_OPT_UPPER.ToString())
+            // 大小写转换（唯一形式）：|\ 转大写、|/ 转小写
+            if (rest == PATTERN_ESCAPE + PATTERN_OPT_UPPER.ToString())
             {
                 ToUpper = true;
                 _transforms = new List<IStringTransform> { new CaseTransform(true) };
                 return;
             }
-            if (rest == PATTERN_ESCAPE + PATTERN_OPT_LOWER.ToString() ||
-                rest == PATTERN_OPT_LOWER.ToString() + PATTERN_OPT_LOWER.ToString())
+            if (rest == PATTERN_ESCAPE + PATTERN_OPT_LOWER.ToString())
             {
                 ToLower = true;
                 _transforms = new List<IStringTransform> { new CaseTransform(false) };
                 return;
+            }
+
+            // 已废弃的旧文档双写形式 \\、//：给出明确迁移提示
+            if (rest == PATTERN_OPT_UPPER.ToString() + PATTERN_OPT_UPPER.ToString() ||
+                rest == PATTERN_OPT_LOWER.ToString() + PATTERN_OPT_LOWER.ToString())
+            {
+                char canonical = rest[0] == PATTERN_OPT_UPPER ? PATTERN_OPT_UPPER : PATTERN_OPT_LOWER;
+                throw new TemplateParseException(
+                    "不再支持双写形式，请使用规范形式 " + PATTERN_START + body.Substring(0, 1)
+                    + PATTERN_ESCAPE + canonical + PATTERN_END, bodyPos + 1);
             }
 
             // 管道串联：| 后跟字母（|\、|/ 已在上面处理）

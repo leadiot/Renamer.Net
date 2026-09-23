@@ -4,12 +4,11 @@ using System.Globalization;
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
     /// <summary>
-    /// 时间信息。语法：|"[body]
+    /// 时间信息。语法：
     /// |"                    当前时间，缺省格式
     /// |"c | |"m | |"a       创建/修改/访问时间，缺省格式
     /// |"c:format            指定来源 + 格式
-    /// |":format | |"format  当前时间 + 格式（裸格式时单字符 c/m/a 会被识别为来源标记，
-    ///                       因此格式恰好为 c/m/a 时请使用带 ':' 的写法）
+    /// |":format             当前时间 + 格式（唯一写法，裸格式 |"format 已移除）
     /// 缺省格式为 yyyyMMddHHmmss。
     /// </summary>
     internal class TimePattern : RenamerPattern
@@ -71,8 +70,10 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
             else
             {
-                // 4) 裸格式（当前时间）：|"yyyy-MM-dd；单字符 c/m/a 已在分支 1 处理
-                i = 0;
+                // 裸格式已移除：自定义格式前必须加 ':'
+                throw new TemplateParseException(
+                    "时间表达式无法识别：来源请用 c/m/a，自定义格式前必须加 ':'，即 |\""
+                    + PATTERN_SPLIT + rest, bodyPos + PATTERN_TIME.Length);
             }
 
             Format = rest.Substring(i);
