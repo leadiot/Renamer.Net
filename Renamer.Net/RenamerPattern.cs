@@ -116,7 +116,7 @@ namespace Com.Scm.Filexp.Rename.Dvo
         /// 表达式解析
         /// </summary>
         /// <returns></returns>
-        public virtual bool Decode()
+        public virtual bool Decode(string body, int bodyPos)
         {
             return true;
         }

@@ -1,6 +1,5 @@
 using Com.Scm.Filexp.Rename.Dvo;
 using Com.Scm.Filexp.Rename.Dvo.Pattern;
-using Com.Scm.Renamer.Pattern;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -101,13 +100,13 @@ namespace Com.Scm.Renamer
             if (first == RenamerPattern.PATTERN_PREFIX[0])
             {
                 var p = new NamePrefixPattern();
-                p.DecodeBody(body, bodyPos);
+                p.Decode(body, bodyPos);
                 pattern = p;
             }
             else if (first == RenamerPattern.PATTERN_SUFFIX[0])
             {
                 var p = new NameSuffixPattern();
-                p.DecodeBody(body, bodyPos);
+                p.Decode(body, bodyPos);
                 pattern = p;
             }
             else if (first == RenamerPattern.PATTERN_ESCAPE)
@@ -122,21 +121,21 @@ namespace Com.Scm.Renamer
                     case '*':
                         {
                             var p = new NumberPattern();
-                            p.DecodeBody(body, bodyPos);
+                            p.Decode(body, bodyPos);
                             pattern = p;
                             break;
                         }
                     case '?':
                         {
                             var p = new LetterPattern();
-                            p.DecodeBody(body, bodyPos);
+                            p.Decode(body, bodyPos);
                             pattern = p;
                             break;
                         }
                     case '"':
                         {
                             var p = new TimePattern();
-                            p.DecodeBody(body, bodyPos);
+                            p.Decode(body, bodyPos);
                             pattern = p;
                             break;
                         }

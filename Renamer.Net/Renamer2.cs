@@ -126,8 +126,7 @@ namespace Com.Scm.Renamer
                 char invalid = IndexOfInvalidChar(candidate);
                 if (invalid != '\0')
                 {
-                    AddError(plan, item, IssueKind.InvalidChar,
-                        "目标文件名含非法字符 '" + invalid + "'：" + candidate);
+                    AddError(plan, item, IssueKind.InvalidChar, "目标文件名含非法字符 '" + invalid + "'：" + candidate);
                     continue;
                 }
 
@@ -150,20 +149,16 @@ namespace Com.Scm.Renamer
                     item.DstName = resolved;
                     item.Status = RenameStatus.Resolved;
                     item.IssueMessage = "原名冲突，已自动调整为：" + resolved;
-                    plan.Warnings.Add(new RenameWarning(item,
-                        (item.SrcName ?? item.Path) + " 与其他文件冲突，已调整为 " + resolved));
+                    plan.Warnings.Add(new RenameWarning(item, (item.SrcName ?? item.Path) + " 与其他文件冲突，已调整为 " + resolved));
                 }
                 else if (duplicated)
                 {
-                    AddError(plan, item, IssueKind.DuplicateTarget,
-                        "目标名与批次内另一文件冲突：" + resolved,
-                        clashItem != null ? clashItem.Path : null);
+                    AddError(plan, item, IssueKind.DuplicateTarget, "目标名与批次内另一文件冲突：" + resolved, clashItem != null ? clashItem.Path : null);
                     continue;
                 }
                 else if (occupied)
                 {
-                    AddError(plan, item, IssueKind.TargetExists,
-                        "目标文件已存在：" + existingPath, existingPath);
+                    AddError(plan, item, IssueKind.TargetExists, "目标文件已存在：" + existingPath, existingPath);
                     continue;
                 }
 

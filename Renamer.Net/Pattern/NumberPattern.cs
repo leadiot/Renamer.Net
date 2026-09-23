@@ -36,7 +36,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         /// <summary>
         /// 解析表达式内容（不含 &lt; &gt;）
         /// </summary>
-        internal void DecodeBody(string body, int bodyPos)
+        public override bool Decode(string body, int bodyPos)
         {
             if (body == null || !body.StartsWith(PATTERN_NUMBER))
             {
@@ -62,6 +62,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
                 }
             }
             TemplateParser.RequireEnd(body, i, bodyPos);
+            return true;
         }
 
         public override void Encode()

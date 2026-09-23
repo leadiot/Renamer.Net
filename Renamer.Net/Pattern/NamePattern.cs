@@ -88,7 +88,7 @@ namespace Com.Scm.Renamer.Pattern
         /// <summary>
         /// 解析表达式内容（不含 &lt; &gt;）。bodyPos 为 body 在整个模板中的起始位置。
         /// </summary>
-        internal void DecodeBody(string body, int bodyPos)
+        public override bool Decode(string body, int bodyPos)
         {
             if (string.IsNullOrEmpty(body))
             {
@@ -106,7 +106,7 @@ namespace Com.Scm.Renamer.Pattern
             if (rest.Length == 0)
             {
                 _transforms = new List<IStringTransform>();
-                return;
+                return true;
             }
 
             // 大小写转换（唯一形式）：|\ 转大写、|/ 转小写
@@ -114,13 +114,13 @@ namespace Com.Scm.Renamer.Pattern
             {
                 ToUpper = true;
                 _transforms = new List<IStringTransform> { new CaseTransform(true) };
-                return;
+                return true;
             }
             if (rest == PATTERN_ESCAPE + PATTERN_OPT_LOWER.ToString())
             {
                 ToLower = true;
                 _transforms = new List<IStringTransform> { new CaseTransform(false) };
-                return;
+                return true;
             }
 
             // 已废弃的旧文档双写形式 \\、//：给出明确迁移提示
@@ -137,14 +137,14 @@ namespace Com.Scm.Renamer.Pattern
             if (rest[0] == PATTERN_ESCAPE && rest.Length > 1 && IsAsciiLetter(rest[1]))
             {
                 _transforms = DecodePipeline(rest.Substring(1), bodyPos + 1);
-                return;
+                return true;
             }
 
             // 旧式按位置操作
             if (rest[0] == PATTERN_DIR_LEFT || rest[0] == PATTERN_DIR_RIGHT)
             {
                 _transforms = new List<IStringTransform> { DecodePositional(rest, bodyPos + 1) };
-                return;
+                return true;
             }
 
             // 旧式文字替换 src|dst
@@ -155,7 +155,7 @@ namespace Com.Scm.Renamer.Pattern
                 SrcText = rest.Substring(0, bar);
                 DstText = rest.Substring(bar + 1);
                 _transforms = new List<IStringTransform> { new ReplaceTransform(SrcText, DstText) };
-                return;
+                return true;
             }
 
             throw new TemplateParseException("无法识别的名称表达式：" + body, bodyPos);

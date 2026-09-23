@@ -53,7 +53,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         /// <summary>
         /// 解析表达式内容（不含 &lt; &gt;）
         /// </summary>
-        internal void DecodeBody(string body, int bodyPos)
+        public override bool Decode(string body, int bodyPos)
         {
             if (body == null || !body.StartsWith(PATTERN_LETTER))
             {
@@ -67,9 +67,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             // 必须显式指定大小写字母表或自定义字符集，不允许缺省
             if (i >= body.Length)
             {
-                throw new TemplateParseException(
-                    "字母序列必须指定字符集：小写使用 |?/，大写使用 |?\\，或直接给出自定义字符集",
-                    bodyPos + i);
+                throw new TemplateParseException("字母序列必须指定字符集：小写使用 |?/，大写使用 |?\\，或直接给出自定义字符集", bodyPos + i);
             }
 
             if (body[i] == PATTERN_OPT_LOWER || body[i] == PATTERN_OPT_UPPER)
@@ -128,6 +126,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
 
             TemplateParser.RequireEnd(body, i, bodyPos);
+            return true;
         }
 
         public override void Encode()

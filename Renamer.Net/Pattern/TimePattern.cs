@@ -33,7 +33,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         /// <summary>
         /// 解析表达式内容（不含 &lt; &gt;）
         /// </summary>
-        internal void DecodeBody(string body, int bodyPos)
+        public override bool Decode(string body, int bodyPos)
         {
             if (body == null || !body.StartsWith(PATTERN_TIME))
             {
@@ -46,7 +46,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 
             if (rest.Length == 0)
             {
-                return;
+                return true;
             }
 
             int i = 0;
@@ -54,7 +54,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             if (rest.Length == 1 && TryParseSource(rest[0], out SourceEnum onlySource))
             {
                 Source = onlySource;
-                return;
+                return true;
             }
 
             // 2) 来源标记 + ':' + 格式：|"c:yyyy-MM-dd
@@ -81,6 +81,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             {
                 throw new TemplateParseException("时间格式不能为空", bodyPos + body.Length);
             }
+            return true;
         }
 
         private static bool TryParseSource(char c, out SourceEnum source)
