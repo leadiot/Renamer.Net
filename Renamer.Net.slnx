@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Renamer.Cmd/Renamer.Cmd.csproj" />
+  <Project Path="Renamer.Net/Renamer.Net.csproj" />
+  <Project Path="Renamer.Wpf/Renamer.Wpf.csproj" />
+</Solution>
