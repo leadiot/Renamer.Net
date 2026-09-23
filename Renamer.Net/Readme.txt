@@ -360,24 +360,23 @@ char        := 任意 Unicode 字符（表达式体内） ;
 十、完整示例
 ================================================================================
 
-  模板                                  原文件名             结果（首个文件）
-  ------------------------------------  -------------------  -------------------------
-  <*>.<?>                               abc.txt              abc.txt（NoChange）
-  <*><.><?>                             abc.txt              abc.txt
-  <*><.><?>                             README               README（无尾随点）
-  <*><.><?>                             .gitignore           .gitignore（点开头无扩展名）
-  <*|\>.<?>                             abc.txt              ABC.txt
-  <*>.<?|/>                             Photo.JPG            Photo.jpg
-  <*\1:9>.<?>                           abcdefghijklmn.jpg   abcdefghi.jpg
-  <*/2:5>.<?>                           abcdefghijklmn.jpg   jklm.jpg
-  <*Abc|123>.<?>                        AbcFile.Abc.txt      123File.123.txt
-  <*|lower|rep:abc:XYZ|cut:L:1:4>.<?>   Abcabcdef.jpg        XYZX.jpg
-  IMAGE<|*4>.<?>                        x.jpg                IMAGE0000.jpg
-  <|*4:10:2>-<*>.<?>                    x.jpg                0010-x.jpg
-  <|?/3>-<*>.<?>                        x.jpg                aaa-x.jpg
-  <|?01:2>-<*>.<?>                      x.jpg                00-x.jpg
-  IMAGE<|":yyyy-MM-dd>-<|*4>.<?>        x.jpg                IMAGE2026-09-24-0000.jpg
-  <|"c:yyyyMMdd_HHmmss>_<*>.<?>         x.jpg                20260924_153045_x.jpg
+  模板                                      原文件名             结果（首个文件）
+  ----------------------------------------  -------------------  -------------------------
+  <*><.><?>                                 abc.txt             abc.txt（无变化）
+  <*><.><?>                                 README              README（无尾随点）
+  <*><.><?>                                 .gitignore          .gitignore（点开头无扩展名）
+  <*|\><.><?>                               abc.txt             ABC.txt
+  <*><.><?|/>                               Photo.JPG           Photo.jpg
+  <*\1:9><.><?>                             abcdefghijklmn.jpg  abcdefghi.jpg
+  <*/2:5><.><?>                             abcdefghijklmn.jpg  jklm.jpg
+  <*Abc|123><.><?>                          AbcFile.Abc.txt     123File.123.txt
+  <*|lower|rep:abc:XYZ|cut:L:1:4><.><?>     Abcabcdef.jpg       XYZX.jpg
+  IMAGE<|*4><.><?>                          x.jpg               IMAGE0000.jpg
+  <|*4:10:2>-<*><.><?>                      x.jpg               0010-x.jpg
+  <|?/3>-<*><.><?>                          x.jpg               aaa-x.jpg
+  <|?01:2>-<*><.><?>                        x.jpg               00-x.jpg
+  IMAGE<|":yyyy-MM-dd>-<|*4><.><?>          x.jpg               IMAGE2026-09-24-0000.jpg
+  <|"c:yyyyMMdd_HHmmss>_<*><.><?>           x.jpg               20260924_153045_x.jpg
 
   AutoSuffix 消解（三个文件目标名相同）：
     FIXED.txt, FIXED (1).txt, FIXED (2).txt
