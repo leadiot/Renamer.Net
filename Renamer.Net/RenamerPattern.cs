@@ -81,13 +81,26 @@ namespace Com.Scm.Filexp.Rename.Dvo
 
         public string Pattern { get; protected set; }
 
+        /// <summary>
+        /// 表达式生成
+        /// </summary>
         public virtual void Encode()
         {
         }
 
+        /// <summary>
+        /// 表达式解析
+        /// </summary>
+        /// <returns></returns>
         public virtual bool Decode()
         {
             return true;
+        }
+
+        public virtual bool GenName(FileItem item)
+        {
+            item.DstName += "";
+            return false;
         }
 
         protected string ToPattern(string pattern)
