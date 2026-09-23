@@ -48,15 +48,5 @@ namespace Com.Scm.Renamer
         /// 状态说明（自动消解说明或错误描述）
         /// </summary>
         public string IssueMessage { get; set; }
-
-        /// <summary>
-        /// 错误代码
-        /// </summary>
-        public int ErrorCode { get; set; }
-
-        /// <summary>
-        /// 错误消息
-        /// </summary>
-        public string ErrorMessage { get; set; }
     }
 }

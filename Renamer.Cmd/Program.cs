@@ -52,7 +52,7 @@ namespace Com.Scm.Renamer
             }
 
             // 2) 表达式（编译失败可重新输入）
-            Renamer2? renamer = null;
+            Renamer? renamer = null;
             while (renamer == null)
             {
                 if (string.IsNullOrWhiteSpace(template))
@@ -67,7 +67,7 @@ namespace Com.Scm.Renamer
 
                 try
                 {
-                    renamer = Renamer2.Compile(template!);
+                    renamer = Renamer.Compile(template!);
                 }
                 catch (TemplateParseException ex)
                 {

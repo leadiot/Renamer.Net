@@ -11,16 +11,16 @@ namespace Com.Scm.Renamer
     /// 数字/字母流水依据 FileItem.Index（本批次中的 0 基序号）计算。
     /// 标准流程：Compile → Preview（冲突检测）→ Commit（提交磁盘改名）。
     /// </summary>
-    public class Renamer2
+    public class Renamer
     {
         private readonly List<RenamerPattern> patterns = new List<RenamerPattern>();
 
         /// <summary>
         /// 编译模板并返回执行器；模板非法时抛出 <see cref="TemplateParseException"/>。
         /// </summary>
-        public static Renamer2 Compile(string template)
+        public static Renamer Compile(string template)
         {
-            var renamer = new Renamer2();
+            var renamer = new Renamer();
             foreach (RenamerPattern pattern in TemplateParser.Parse(template))
             {
                 renamer.Add(pattern);
@@ -35,39 +35,6 @@ namespace Com.Scm.Renamer
                 throw new ArgumentNullException(nameof(pattern));
             }
             this.patterns.Add(pattern);
-        }
-
-        /// <summary>
-        /// 仅为批次内每个文件生成 DstName（不做冲突检测）。保留旧调用契约；
-        /// 新代码请使用 <see cref="Preview"/>。
-        /// </summary>
-        public bool Rename(List<FileItem> fileList)
-        {
-            if (fileList == null)
-            {
-                throw new ArgumentNullException(nameof(fileList));
-            }
-
-            for (int k = 0; k < fileList.Count; k++)
-            {
-                FileItem item = fileList[k];
-                item.Index = k;
-                try
-                {
-                    if (!Evaluate(item))
-                    {
-                        item.ErrorCode = 1;
-                        return false;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    item.ErrorCode = 1;
-                    item.ErrorMessage = ex.Message;
-                    return false;
-                }
-            }
-            return true;
         }
 
         /// <summary>
@@ -90,8 +57,6 @@ namespace Com.Scm.Renamer
             {
                 FileItem item = fileList[k];
                 item.Index = k;
-                item.ErrorCode = 0;
-                item.ErrorMessage = null;
                 item.IssueMessage = null;
                 item.Status = RenameStatus.Ok;
 
@@ -109,8 +74,6 @@ namespace Com.Scm.Renamer
                 catch (Exception ex)
                 {
                     item.Status = RenameStatus.Error;
-                    item.ErrorCode = 1;
-                    item.ErrorMessage = ex.Message;
                     item.IssueMessage = ex.Message;
                     plan.Issues.Add(new RenameIssue(item, IssueKind.EvalError, "表达式求值失败：" + ex.Message));
                     continue;
@@ -260,8 +223,6 @@ namespace Com.Scm.Renamer
         private static void AddError(RenamePlan plan, FileItem item, IssueKind kind, string message, string otherPath = null)
         {
             item.Status = RenameStatus.Error;
-            item.ErrorCode = 1;
-            item.ErrorMessage = message;
             item.IssueMessage = message;
             plan.Issues.Add(new RenameIssue(item, kind, message, otherPath));
         }
