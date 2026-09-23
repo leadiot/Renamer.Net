@@ -29,16 +29,16 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             switch (Source)
             {
                 case SourceEnum.CurrentTime:
-                    pattern = PATTERN_TIME;
+                    pattern = PATTERN_TIME_CURRENT;
                     break;
                 case SourceEnum.CreateTime:
-                    pattern = PATTERN_TIME;
+                    pattern = PATTERN_TIME_CREATE;
                     break;
                 case SourceEnum.ModifyTime:
-                    pattern = PATTERN_TIME;
+                    pattern = PATTERN_TIME_MODIFY;
                     break;
                 case SourceEnum.AccessTime:
-                    pattern = PATTERN_TIME;
+                    pattern = PATTERN_TIME_ACCESS;
                     break;
             }
 

@@ -55,7 +55,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 
         public override void Encode()
         {
-            var pattern = GenPattern(PATTERN_SUFFIX);
+            var pattern = GenPattern(PATTERN_PREFIX);
 
             Pattern = ToPattern(pattern);
         }

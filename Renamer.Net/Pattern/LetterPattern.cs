@@ -74,7 +74,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
             if (Length > 0)
             {
-                pattern += PATTERN_SPLIT + Length;
+                pattern += Length;
             }
             if (Start > 0)
             {
@@ -133,7 +133,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 
         public override void Encode()
         {
-            var pattern = PATTERN_LETTER + PATTERN_OPT_LOWER;
+            var pattern = PATTERN_LETTER + PATTERN_OPT_UPPER;
 
             if (Length > 0)
             {

@@ -8,4 +8,8 @@
     <RootNamespace>Com.Scm.Renamer</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Renamer.Net\Renamer.Net.csproj" />
+  </ItemGroup>
+
 </Project>
