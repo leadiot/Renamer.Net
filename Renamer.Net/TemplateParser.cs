@@ -145,10 +145,19 @@ namespace Com.Scm.Renamer
                             "无法识别的表达式类型（|* 数字、|? 字母、|\" 时间）", bodyPos + 1);
                 }
             }
+            else if (body == RenamerPattern.PATTERN_SEPARATOR)
+            {
+                pattern = new SeparatorPattern();
+            }
+            else if (first == RenamerPattern.PATTERN_SEPARATOR[0])
+            {
+                throw new TemplateParseException(
+                    "条件分隔符只能是 <.>（点号后不能有其他字符）", bodyPos + 1);
+            }
             else
             {
                 throw new TemplateParseException(
-                    "表达式必须以 *、?、| 开头：" + body, bodyPos);
+                    "表达式必须以 *、?、| 开头（条件分隔符为 <.>）：" + body, bodyPos);
             }
 
             pattern.Pattern = raw;

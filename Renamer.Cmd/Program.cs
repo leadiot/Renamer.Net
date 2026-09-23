@@ -21,6 +21,7 @@ namespace Com.Scm.Renamer
             Console.WriteLine("表达式示例：IMAGE<|*4>-<*>.<?>" +
                               "   <*|lower|rep:abc:XYZ>.<?>" +
                               "   <|\"c:yyyyMMdd>_<*>.<?>");
+            Console.WriteLine("             <*><.><?>（无扩展名文件不产生尾随点）");
             Console.WriteLine("输入 q 可随时退出。");
             Console.WriteLine();
 

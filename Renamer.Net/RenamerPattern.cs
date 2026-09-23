@@ -1,4 +1,4 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 
 namespace Com.Scm.Filexp.Rename.Dvo
 {
@@ -94,6 +94,10 @@ namespace Com.Scm.Filexp.Rename.Dvo
         /// 时间默认展示格式
         /// </summary>
         public const string PATTERN_TIME_DEFAULT_FORMAT = "yyyyMMddHHmmss";
+        /// <summary>
+        /// 条件分隔符 &lt;.&gt;：有扩展名时输出点，无扩展名时输出空串
+        /// </summary>
+        public const string PATTERN_SEPARATOR = ".";
 
         public PatternType Type { get; protected internal set; }
 

@@ -1,4 +1,4 @@
-﻿namespace Com.Scm.Renamer
+namespace Com.Scm.Renamer
 {
     public enum PatternType
     {
@@ -27,5 +27,9 @@
         /// 字母
         /// </summary>
         Letter,
+        /// <summary>
+        /// 条件分隔符（有扩展名时输出点）
+        /// </summary>
+        Separator,
     }
 }
