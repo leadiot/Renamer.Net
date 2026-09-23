@@ -11,8 +11,11 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             Pattern = "文本";
         }
 
+        public string Text { get; set; }
+
         public override void Encode()
         {
+            Pattern = Text;
         }
     }
 }

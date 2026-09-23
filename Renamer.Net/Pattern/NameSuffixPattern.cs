@@ -1,8 +1,12 @@
 ﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer.Pattern;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
-    internal class SuffixPattern : RenamerPattern
+    /// <summary>
+    /// 文件名称后缀表达式
+    /// </summary>
+    internal class NameSuffixPattern : NamePattern
     {
         /// <summary>
         /// 保持不变
@@ -17,7 +21,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         /// </summary>
         public const int OPTION_2 = 2;
 
-        public SuffixPattern()
+        public NameSuffixPattern()
         {
             Type = PatternType.Suffix;
             Title = "文件后缀";
@@ -37,37 +41,11 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
         }
 
-        private int _Length;
-        public int Length
-        {
-            get
-            {
-                return _Length;
-            }
-            set
-            {
-                _Length = value;
-            }
-        }
-
         public override void Encode()
         {
-            var pattern = "?";
-            switch (Option)
-            {
-                case 0:
-                    break;
-                case OPTION_1:
-                    pattern += "\\" + Length;
-                    break;
-                case OPTION_2:
-                    pattern += "/" + Length;
-                    break;
-                default:
-                    return;
-            }
+            var pattern = GenPattern(PATTERN_SUFFIX);
 
-            Pattern = "<" + pattern + ">";
+            Pattern = ToPattern(pattern);
         }
     }
 }

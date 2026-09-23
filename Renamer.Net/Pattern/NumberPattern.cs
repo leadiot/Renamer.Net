@@ -13,19 +13,6 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             Length = 0;
         }
 
-        private int _Start;
-        public int Start
-        {
-            get
-            {
-                return _Start;
-            }
-            set
-            {
-                _Start = value;
-            }
-        }
-
         private int _Length;
         public int Length
         {
@@ -39,10 +26,49 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             }
         }
 
+        private int _Start;
+        public int Start
+        {
+            get
+            {
+                return _Start;
+            }
+            set
+            {
+                _Start = value;
+            }
+        }
+
+        private int _Step;
+        public int Step
+        {
+            get
+            {
+                return _Step;
+            }
+            set
+            {
+                _Step = value;
+            }
+        }
+
         public override void Encode()
         {
-            var pattern = ":" + Length + "," + Start;
-            Pattern = "<" + pattern + ">";
+            var pattern = PATTERN_NUMBER;
+            if (Length > 0)
+            {
+                pattern += Length;
+            }
+            if (Start > 0)
+            {
+                pattern += PATTERN_SPLIT + Start;
+            }
+            if (Step > 0)
+            {
+                pattern += PATTERN_SPLIT + Step;
+            }
+
+            Pattern = ToPattern(pattern);
         }
     }
 }

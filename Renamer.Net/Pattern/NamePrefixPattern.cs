@@ -1,8 +1,12 @@
 ﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer.Pattern;
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
-    internal class PrefixPattern : RenamerPattern
+    /// <summary>
+    /// 文件名称前缀表达式
+    /// </summary>
+    internal class NamePrefixPattern : NamePattern
     {
         /// <summary>
         /// 保持不变
@@ -17,10 +21,10 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         /// </summary>
         public const int OPTION_2 = 2;
 
-        public PrefixPattern()
+        public NamePrefixPattern()
         {
             Type = PatternType.Prefix;
-            Title = "文件名称";
+            Title = "文件前缀";
             Pattern = "<*>";
         }
 
@@ -52,22 +56,9 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 
         public override void Encode()
         {
-            var pattern = "*";
-            switch (Option)
-            {
-                case OPTION_0:
-                    break;
-                case OPTION_1:
-                    pattern += "\\" + Length;
-                    break;
-                case OPTION_2:
-                    pattern += "/" + Length;
-                    break;
-                default:
-                    return;
-            }
+            var pattern = GenPattern(PATTERN_SUFFIX);
 
-            Pattern = "<" + pattern + ">";
+            Pattern = ToPattern(pattern);
         }
     }
 }

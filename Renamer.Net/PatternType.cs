@@ -4,6 +4,10 @@
     {
         None,
         /// <summary>
+        /// 文本
+        /// </summary>
+        Text,
+        /// <summary>
         /// 前缀
         /// </summary>
         Prefix,
@@ -11,10 +15,6 @@
         /// 后缀
         /// </summary>
         Suffix,
-        /// <summary>
-        /// 文本
-        /// </summary>
-        Text,
         /// <summary>
         /// 时间
         /// </summary>

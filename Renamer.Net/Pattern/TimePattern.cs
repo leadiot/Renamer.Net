@@ -114,7 +114,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
                     break;
             }
 
-            Pattern = pattern;
+            Pattern = ToPattern(pattern);
         }
     }
 }
