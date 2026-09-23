@@ -2,13 +2,15 @@
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
+    /// <summary>
+    /// 字符序列
+    /// </summary>
     internal class LetterPattern : RenamerPattern
     {
         public LetterPattern()
         {
             Type = PatternType.Letter;
-            Title = "字母序列";
-            Pattern = "<|?>";
+            Title = "字符序列";
         }
 
         private char[] _Letters;
@@ -92,7 +94,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         public LowerLetterPattern()
         {
             Type = PatternType.Letter;
-            Title = "字母序列";
+            Title = "小写字母序列";
             Pattern = "<|?/>";
             Start = 0;
             Length = 0;
@@ -123,7 +125,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         public UpperLetterPattern()
         {
             Type = PatternType.Letter;
-            Title = "字母序列";
+            Title = "大写字母序列";
             Pattern = "<|?\\>";
             Start = 0;
             Length = 0;

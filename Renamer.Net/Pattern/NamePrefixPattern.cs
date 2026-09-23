@@ -25,7 +25,6 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         {
             Type = PatternType.Prefix;
             Title = "文件前缀";
-            Pattern = "<*>";
         }
 
         private int _Option;

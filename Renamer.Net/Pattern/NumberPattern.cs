@@ -2,15 +2,15 @@
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
+    /// <summary>
+    /// 数字序列
+    /// </summary>
     internal class NumberPattern : RenamerPattern
     {
         public NumberPattern()
         {
             Type = PatternType.Number;
             Title = "数字序列";
-            Pattern = "<|*>";
-            Start = 0;
-            Length = 0;
         }
 
         private int _Length;

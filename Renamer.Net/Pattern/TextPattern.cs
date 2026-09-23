@@ -2,13 +2,15 @@
 
 namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 {
+    /// <summary>
+    /// 固定文本
+    /// </summary>
     internal class TextPattern : RenamerPattern
     {
         public TextPattern()
         {
             Type = PatternType.Text;
             Title = "固定文本";
-            Pattern = "文本";
         }
 
         public string Text { get; set; }

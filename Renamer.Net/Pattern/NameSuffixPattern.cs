@@ -25,7 +25,6 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         {
             Type = PatternType.Suffix;
             Title = "文件后缀";
-            Pattern = "<?>";
         }
 
         private int _Option;
