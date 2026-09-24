@@ -1,0 +1,110 @@
+{
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8",
+    "version_source": "skill-release-manifest.json",
+    "read_status": "ok"
+  },
+  "project": {
+    "name": "批量重命名工具界面 - 重设计稿",
+    "projectPath": "d:\\workspace\\Git\\Renamer.Net\\batch-renamer-ui-draft",
+    "deviceType": "desktop",
+    "resolvedLane": "redesign_duplicate_project",
+    "selectedIntentWorkflowRead": true,
+    "contextRequirementsLoaded": [
+      {"path": "shared-runtime/runtime-boundaries/lane-runtime-contracts.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "delivery-quality/page-rendering-quality-gate.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "delivery-quality/design-artifact-validation.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "delivery-quality/delivery-evidence-contract.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "visual-experience/visual-experience-guidelines.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "intent-workflows/intent-project-mutation/redesign-project-ui.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "intent-workflows/intent-project-mutation/redesign-page-runtime.md", "readStatus": "loaded", "bodyRead": true},
+      {"path": "intent-workflows/intent-project-mutation/redesign-dispatch-contract.md", "readStatus": "loaded", "bodyRead": true}
+    ],
+    "validationRunDiscipline": {
+      "maxFullValidationRuns": 2,
+      "softWarningsTriggerRepair": false,
+      "blockingRepairMode": "targeted-once",
+      "forbiddenRepairTriggers": ["soft-warning-only", "provenance-warning-only", "style-warning-only"]
+    },
+    "lowValueCallWatchdog": {
+      "applies": true,
+      "noProgressSignals": ["no_tool_call", "no_artifact_diff", "no_structured_decision"],
+      "noProgressNextAction": "enter_readiness_or_blocked_summary"
+    },
+    "intentProfile": {
+      "caseFamily": "redesign_duplicate_project",
+      "surface": "page",
+      "routingReason": "User provided a reference image and asked to redesign the existing batch-renamer UI in that style; a forked draft project is used so the original remains intact."
+    },
+    "creativeRecipe": {
+      "businessTone": "classic Windows desktop utility — blue chrome, clear grid, functional buttons",
+      "layoutArchetype": "single-pane workbench: blue expression bar, quick tag row, blue toolbar, four-column result table, status footer",
+      "visualSignature": "blue title bar and buttons, white/light alternating table rows, crisp borders, system-style labels",
+      "densityTarget": "dense",
+      "avoidOneThing": "avoid flat card surfaces, rounded pill shapes, and dark mode palettes from the original"
+    },
+    "styleContinuityAnchors": [
+      "Chinese UI copy from original page",
+      "monospace filenames in the result table",
+      "expression placeholder tokens {name}/{ext}/{index}/{date}/{original}",
+      "sample file list preserved",
+      "blue/white Windows-style chrome"
+    ],
+    "redesignAudit": {
+      "primaryIssue": "current UI uses modern card/split layout; reference is a classic Windows desktop tool with blue chrome and unified grid table",
+      "fixPriority": ["layout", "color system", "component language", "typography"],
+      "preserve": ["business copy and labels", "expression editing, file list, preview core functions", "sample file data", "Chinese language"],
+      "change": ["top blue expression bar with quick tags", "single four-column table (原始名称/结果名称/异常信息/执行结果)", "blue toolbar and action buttons", "alternating row colors and system-style borders"],
+      "risk": "do not break existing data-dom-ids; keep theme toggle if feasible or replace with equivalent control"
+    },
+    "cssPreflightEvidence": {
+      "applies": true,
+      "status": "pending",
+      "command": null,
+      "brandPrefix": "renamer",
+      "checks": {
+        "themeVars": "pending",
+        "semanticTokenFallback": "pending",
+        "themeInline": "pending",
+        "tailwindCdn": "pending",
+        "htmlClass": "pending",
+        "semanticMappings": "pending"
+      },
+      "retryCount": 0,
+      "blockingReason": null
+    },
+    "dispatchPreflightManifest": [],
+    "expectedDispatches": [],
+    "defaultDeliverableVisibility": {
+      "applies": true,
+      "requiredVisibleRegions": [
+        {"htmlSrc": "pages/index.html", "selector": "[data-region='expression-editor']", "label": "表达式编辑区", "source": "reference image"},
+        {"htmlSrc": "pages/index.html", "selector": "[data-region='result-table']", "label": "结果表格区", "source": "reference image"},
+        {"htmlSrc": "pages/index.html", "selector": "[data-region='toolbar']", "label": "工具栏", "source": "reference image"}
+      ],
+      "hiddenAllowed": []
+    },
+    "pageCompletenessGate": {
+      "expectedPages": ["index"],
+      "requiredStates": [],
+      "requiredInteractions": [],
+      "requiredNavigation": [],
+      "missingAllowed": []
+    }
+  },
+  "pages": [
+    {
+      "nodeId": "page-index",
+      "htmlSrc": "pages/index.html",
+      "title": "批量重命名 - 重设计稿",
+      "deviceType": "desktop",
+      "viewportMode": "app-shell",
+      "qualityRisks": ["classic desktop styling with table alignment", "blue toolbar contrast", "data table density"],
+      "stateGroupId": null,
+      "stateRole": null,
+      "derivedFromHtmlSrc": null
+    }
+  ]
+}

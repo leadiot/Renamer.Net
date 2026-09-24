@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量重命名 - 重设计稿</title>
+    <style id="theme-vars">
+/* Renamer Batch UI — fresh/clean token contract (light + dark) */
+
+:root {
+  /* Brand primary scale — sky/cyan */
+  --renamer-primary-50: #f0f9ff;
+  --renamer-primary-100: #e0f2fe;
+  --renamer-primary-200: #bae6fd;
+  --renamer-primary-300: #7dd3fc;
+  --renamer-primary-400: #38bdf8;
+  --renamer-primary-500: #0ea5e9;
+  --renamer-primary-600: #0284c7;
+  --renamer-primary-700: #0369a1;
+  --renamer-primary-800: #075985;
+  --renamer-primary-900: #0c4a6e;
+
+  /* Light neutral scale */
+  --renamer-neutral-0: #ffffff;
+  --renamer-neutral-50: #f8fafc;
+  --renamer-neutral-100: #f1f5f9;
+  --renamer-neutral-200: #e2e8f0;
+  --renamer-neutral-300: #cbd5e1;
+  --renamer-neutral-400: #94a3b8;
+  --renamer-neutral-500: #64748b;
+  --renamer-neutral-600: #475569;
+  --renamer-neutral-700: #334155;
+  --renamer-neutral-800: #1e293b;
+  --renamer-neutral-900: #0f172a;
+
+  /* Light semantic aliases */
+  --renamer-background: var(--renamer-neutral-50);
+  --renamer-foreground: var(--renamer-neutral-900);
+  --renamer-card: var(--renamer-neutral-0);
+  --renamer-card-foreground: var(--renamer-neutral-900);
+  --renamer-popover: var(--renamer-neutral-0);
+  --renamer-popover-foreground: var(--renamer-neutral-900);
+  --renamer-primary: var(--renamer-primary-500);
+  --renamer-primary-foreground: var(--renamer-neutral-0);
+  --renamer-muted: var(--renamer-neutral-100);
+  --renamer-muted-foreground: var(--renamer-neutral-500);
+  --renamer-border: var(--renamer-neutral-200);
+  --renamer-input: var(--renamer-neutral-0);
+  --renamer-ring: var(--renamer-primary-400);
+  --renamer-radius-sm: 6px;
+  --renamer-radius-md: 10px;
+  --renamer-radius-lg: 14px;
+  --renamer-radius-xl: 18px;
+
+  --renamer-surface: var(--renamer-card);
+  --renamer-surface-2: var(--renamer-neutral-100);
+  --renamer-ink: var(--renamer-foreground);
+  --renamer-ink-2: var(--renamer-neutral-600);
+  --renamer-ink-3: var(--renamer-neutral-400);
+  --renamer-line: var(--renamer-border);
+
+  --renamer-state-success: #10b981;
+  --renamer-state-warning: #f59e0b;
+  --renamer-state-error: #f43f5e;
+  --renamer-state-info: #0ea5e9;
+
+  --renamer-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.02);
+  --renamer-shadow-2: 0 6px 16px -6px rgba(14, 165, 233, 0.12);
+
+  --renamer-font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --renamer-font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+html.dark {
+  --renamer-primary-50: #082f49;
+  --renamer-primary-100: #0c4a6e;
+  --renamer-primary-200: #075985;
+  --renamer-primary-300: #0369a1;
+  --renamer-primary-400: #0284c7;
+  --renamer-primary-500: #0ea5e9;
+  --renamer-primary-600: #38bdf8;
+  --renamer-primary-700: #7dd3fc;
+  --renamer-primary-800: #bae6fd;
+  --renamer-primary-900: #e0f2fe;
+
+  --renamer-neutral-0: #18181b;
+  --renamer-neutral-50: #0b0b0f;
+  --renamer-neutral-100: #14141a;
+  --renamer-neutral-200: #1e1e24;
+  --renamer-neutral-300: #27272a;
+  --renamer-neutral-400: #52525b;
+  --renamer-neutral-500: #71717a;
+  --renamer-neutral-600: #a1a1aa;
+  --renamer-neutral-700: #d4d4d8;
+  --renamer-neutral-800: #e4e4e7;
+  --renamer-neutral-900: #f4f4f5;
+
+  --renamer-background: var(--renamer-neutral-50);
+  --renamer-foreground: var(--renamer-neutral-900);
+  --renamer-card: var(--renamer-neutral-100);
+  --renamer-card-foreground: var(--renamer-neutral-900);
+  --renamer-popover: var(--renamer-neutral-100);
+  --renamer-popover-foreground: var(--renamer-neutral-900);
+  --renamer-primary: var(--renamer-primary-500);
+  --renamer-primary-foreground: var(--renamer-neutral-0);
+  --renamer-muted: var(--renamer-neutral-200);
+  --renamer-muted-foreground: var(--renamer-neutral-500);
+  --renamer-border: var(--renamer-neutral-200);
+  --renamer-input: var(--renamer-neutral-200);
+  --renamer-ring: var(--renamer-primary-400);
+
+  --renamer-surface: var(--renamer-card);
+  --renamer-surface-2: var(--renamer-neutral-200);
+  --renamer-ink: var(--renamer-foreground);
+  --renamer-ink-2: var(--renamer-neutral-600);
+  --renamer-ink-3: var(--renamer-neutral-500);
+  --renamer-line: var(--renamer-border);
+
+  --renamer-state-success: #34d399;
+  --renamer-state-warning: #fbbf24;
+  --renamer-state-error: #fb7185;
+  --renamer-state-info: #38bdf8;
+
+  --renamer-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02);
+  --renamer-shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--renamer-font-sans);
+  background: var(--renamer-background);
+  color: var(--renamer-ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, kbd, .font-mono {
+  font-family: var(--renamer-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font-family: inherit;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--renamer-background);
+    --color-foreground: var(--renamer-foreground);
+    --color-card: var(--renamer-card);
+    --color-card-foreground: var(--renamer-card-foreground);
+    --color-popover: var(--renamer-popover);
+    --color-popover-foreground: var(--renamer-popover-foreground);
+    --color-primary: var(--renamer-primary);
+    --color-primary-foreground: var(--renamer-primary-foreground);
+    --color-muted: var(--renamer-muted);
+    --color-muted-foreground: var(--renamer-muted-foreground);
+    --color-border: var(--renamer-border);
+    --color-input: var(--renamer-input);
+    --color-ring: var(--renamer-ring);
+    --radius-sm: var(--renamer-radius-sm);
+    --radius-md: var(--renamer-radius-md);
+    --radius-lg: var(--renamer-radius-lg);
+    --radius-xl: var(--renamer-radius-xl);
+  }
+  @layer base {
+    body { background: var(--renamer-background); color: var(--renamer-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--renamer-background); }
+      .text-background { color: var(--renamer-background); }
+      .border-background { border-color: var(--renamer-background); }
+      .ring-background { --tw-ring-color: var(--renamer-background); }
+      .bg-foreground { background-color: var(--renamer-foreground); }
+      .text-foreground { color: var(--renamer-foreground); }
+      .border-foreground { border-color: var(--renamer-foreground); }
+      .ring-foreground { --tw-ring-color: var(--renamer-foreground); }
+      .bg-card { background-color: var(--renamer-card); }
+      .text-card { color: var(--renamer-card); }
+      .border-card { border-color: var(--renamer-card); }
+      .ring-card { --tw-ring-color: var(--renamer-card); }
+      .bg-card-foreground { background-color: var(--renamer-card-foreground); }
+      .text-card-foreground { color: var(--renamer-card-foreground); }
+      .border-card-foreground { border-color: var(--renamer-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--renamer-card-foreground); }
+      .bg-popover { background-color: var(--renamer-popover); }
+      .text-popover { color: var(--renamer-popover); }
+      .border-popover { border-color: var(--renamer-popover); }
+      .ring-popover { --tw-ring-color: var(--renamer-popover); }
+      .bg-popover-foreground { background-color: var(--renamer-popover-foreground); }
+      .text-popover-foreground { color: var(--renamer-popover-foreground); }
+      .border-popover-foreground { border-color: var(--renamer-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--renamer-popover-foreground); }
+      .bg-primary { background-color: var(--renamer-primary); }
+      .text-primary { color: var(--renamer-primary); }
+      .border-primary { border-color: var(--renamer-primary); }
+      .ring-primary { --tw-ring-color: var(--renamer-primary); }
+      .bg-primary-foreground { background-color: var(--renamer-primary-foreground); }
+      .text-primary-foreground { color: var(--renamer-primary-foreground); }
+      .border-primary-foreground { border-color: var(--renamer-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--renamer-primary-foreground); }
+      .bg-muted { background-color: var(--renamer-muted); }
+      .text-muted { color: var(--renamer-muted); }
+      .border-muted { border-color: var(--renamer-muted); }
+      .ring-muted { --tw-ring-color: var(--renamer-muted); }
+      .bg-muted-foreground { background-color: var(--renamer-muted-foreground); }
+      .text-muted-foreground { color: var(--renamer-muted-foreground); }
+      .border-muted-foreground { border-color: var(--renamer-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--renamer-muted-foreground); }
+      .bg-border { background-color: var(--renamer-border); }
+      .text-border { color: var(--renamer-border); }
+      .border-border { border-color: var(--renamer-border); }
+      .ring-border { --tw-ring-color: var(--renamer-border); }
+      .bg-input { background-color: var(--renamer-input); }
+      .text-input { color: var(--renamer-input); }
+      .border-input { border-color: var(--renamer-input); }
+      .ring-input { --tw-ring-color: var(--renamer-input); }
+      .bg-ring { background-color: var(--renamer-ring); }
+      .text-ring { color: var(--renamer-ring); }
+      .border-ring { border-color: var(--renamer-ring); }
+      .ring-ring { --tw-ring-color: var(--renamer-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body>
+  <main data-viewport-mode="app-shell" class="bg-background text-foreground">
+    <style id="critical-layout">
+      html, body, main[data-viewport-mode="app-shell"] {
+        height: 100%;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      main[data-viewport-mode="app-shell"] {
+        display: flex;
+        flex-direction: column;
+        max-width: 100vw;
+        min-width: 0;
+      }
+      .app-chrome {
+        flex-shrink: 0;
+        min-width: 0;
+      }
+      [data-scroll-region="primary"] {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-width: 0;
+      }
+      .expression-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        background: var(--renamer-card);
+        color: var(--renamer-ink);
+        border-bottom: 1px solid var(--renamer-border);
+        min-width: 0;
+      }
+      .expression-bar label {
+        flex-shrink: 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--renamer-ink-2);
+      }
+      .expression-bar input {
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 34px;
+        padding: 0 12px;
+        border: 1px solid var(--renamer-neutral-300);
+        border-radius: var(--renamer-radius-md);
+        background: var(--renamer-input);
+        color: var(--renamer-foreground);
+        font-family: var(--renamer-font-mono);
+        font-size: 13px;
+      }
+      .expression-bar .btn-m {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 50%;
+        background: var(--renamer-primary-500);
+        color: var(--renamer-primary-foreground);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter 150ms ease, background 150ms ease, box-shadow 150ms ease;
+        box-shadow: var(--renamer-shadow-1);
+      }
+      .expression-bar .btn-m:hover {
+        filter: brightness(1.1);
+        box-shadow: var(--renamer-shadow-2);
+      }
+      .expression-bar .btn-m:active {
+        filter: brightness(0.98);
+        box-shadow: var(--renamer-shadow-1);
+      }
+      .quick-tags {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--renamer-surface-2);
+        border-bottom: 1px solid var(--renamer-border);
+        min-width: 0;
+        flex-wrap: wrap;
+      }
+      .quick-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 34px;
+        padding: 0 18px;
+        border: 1px solid var(--renamer-primary-200);
+        border-radius: 9999px;
+        background: transparent;
+        color: var(--renamer-primary-700);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+      }
+      .quick-tag:hover {
+        background: var(--renamer-primary-50);
+        border-color: var(--renamer-primary-300);
+        color: var(--renamer-primary-600);
+      }
+      .quick-tag:active {
+        background: var(--renamer-primary-100);
+      }
+      .quick-tag.tag-add {
+        width: 34px;
+        padding: 0;
+        border-radius: 50%;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 16px;
+        background: var(--renamer-card);
+        color: var(--renamer-ink);
+        border-bottom: 1px solid var(--renamer-border);
+        min-width: 0;
+      }
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+      .toolbar-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 18px;
+        border: none;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, var(--renamer-primary-400) 0%, var(--renamer-primary-600) 100%);
+        color: var(--renamer-primary-foreground);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: filter 150ms ease, box-shadow 150ms ease;
+        box-shadow: var(--renamer-shadow-1);
+      }
+      .toolbar-btn:hover {
+        filter: brightness(1.08);
+        box-shadow: var(--renamer-shadow-2);
+      }
+      .toolbar-btn:active {
+        filter: brightness(0.98);
+        box-shadow: var(--renamer-shadow-1);
+      }
+      .renamer-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        background: var(--renamer-card);
+      }
+      .renamer-table th,
+      .renamer-table td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 13px;
+        text-align: left;
+        border-right: 1px solid var(--renamer-border);
+        border-bottom: 1px solid var(--renamer-border);
+      }
+      .renamer-table th:last-child,
+      .renamer-table td:last-child {
+        border-right: none;
+      }
+      .renamer-table thead th {
+        background: var(--renamer-surface-2);
+        color: var(--renamer-ink);
+        font-weight: 600;
+        border-bottom: 1px solid var(--renamer-border);
+        border-right: 1px solid var(--renamer-border);
+      }
+      .renamer-table tbody tr:nth-child(even) {
+        background: var(--renamer-primary-50);
+      }
+      .renamer-table tbody tr:nth-child(odd) {
+        background: var(--renamer-card);
+      }
+      .status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 16px;
+        background: var(--renamer-card);
+        color: var(--renamer-ink-2);
+        border-top: 1px solid var(--renamer-border);
+        font-size: 12px;
+        flex-shrink: 0;
+        min-width: 0;
+      }
+      .status-bar-left,
+      .status-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .text-renamer-success { color: var(--renamer-state-success); }
+      .text-renamer-warning { color: var(--renamer-state-warning); }
+      .text-renamer-error { color: var(--renamer-state-error); }
+      @media (max-width: 1023px) {
+        .expression-bar, .toolbar {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+
+    <section data-region="expression-bar" class="app-chrome expression-bar">
+      <label for="rename-expression">更名表达式：</label>
+      <input id="rename-expression" type="text" value="{name}_{index}.{ext}" />
+      <button type="button" class="btn-m" aria-label="表达式菜单">M</button>
+    </section>
+
+    <section data-region="quick-tags" class="app-chrome quick-tags">
+      <button type="button" class="quick-tag tag-add" aria-label="添加表达式">+</button>
+      <button type="button" class="quick-tag">表达式1</button>
+      <button type="button" class="quick-tag">表达式2</button>
+      <button type="button" class="quick-tag">.</button>
+      <button type="button" class="quick-tag">表达式n</button>
+      <button type="button" class="quick-tag tag-add" aria-label="添加表达式">+</button>
+    </section>
+
+    <section data-region="toolbar" class="app-chrome toolbar">
+      <div class="toolbar-group">
+        <button type="button" class="toolbar-btn">
+          <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+          <span>添加目录</span>
+        </button>
+        <button type="button" class="toolbar-btn">
+          <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
+          <span>添加文件</span>
+        </button>
+        <button type="button" class="toolbar-btn">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>刷新预览</span>
+        </button>
+        <button type="button" class="toolbar-btn">
+          <i data-lucide="play" class="w-3.5 h-3.5"></i>
+          <span>执行更名</span>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" class="toolbar-btn">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>导出</span>
+        </button>
+      </div>
+    </section>
+
+    <div data-scroll-region="primary" class="flex-1 min-h-0 overflow-auto overflow-y-auto">
+      <table class="renamer-table">
+        <thead>
+          <tr>
+            <th class="w-[30%]">原始名称</th>
+            <th class="w-[30%]">结果名称</th>
+            <th class="w-[25%]">异常信息</th>
+            <th class="w-[15%]">执行结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono">IMG_20240912_001.jpg</td>
+            <td class="font-mono">batch_001_IMG_20240912_001.jpg</td>
+            <td></td>
+            <td><i data-lucide="check" class="w-4 h-4 text-renamer-success inline-block"></i> 成功</td>
+          </tr>
+          <tr>
+            <td class="font-mono">会议记录_2024-09-10.docx</td>
+            <td class="font-mono">batch_002_会议记录_2024-09-10.docx</td>
+            <td></td>
+            <td><i data-lucide="check" class="w-4 h-4 text-renamer-success inline-block"></i> 成功</td>
+          </tr>
+          <tr>
+            <td class="font-mono">report_v1_final.pdf</td>
+            <td class="font-mono">batch_003_report_v1_final.pdf</td>
+            <td></td>
+            <td><i data-lucide="check" class="w-4 h-4 text-renamer-success inline-block"></i> 成功</td>
+          </tr>
+          <tr>
+            <td class="font-mono">screenshot (2).png</td>
+            <td class="font-mono">batch_004_screenshot (2).png</td>
+            <td></td>
+            <td><i data-lucide="check" class="w-4 h-4 text-renamer-success inline-block"></i> 成功</td>
+          </tr>
+          <tr>
+            <td class="font-mono">data_export_20240911.xlsx</td>
+            <td class="font-mono">batch_005_data_export_20240911.xlsx</td>
+            <td></td>
+            <td><i data-lucide="check" class="w-4 h-4 text-renamer-success inline-block"></i> 成功</td>
+          </tr>
+          <tr>
+            <td class="font-mono">notes.txt</td>
+            <td class="font-mono">-</td>
+            <td class="text-renamer-error">文件名已存在</td>
+            <td><i data-lucide="x" class="w-4 h-4 text-renamer-error inline-block"></i> 失败</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer data-region="status-bar" class="status-bar">
+      <div class="status-bar-left">
+        <i data-lucide="info" class="w-3.5 h-3.5"></i>
+        <span>已选择6个文件</span>
+      </div>
+      <div class="status-bar-right">
+        <span>按Ctrl+R刷新预览</span>
+      </div>
+    </footer>
+
+    <script>
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    </script>
+  </main>
+</body>
+</html>

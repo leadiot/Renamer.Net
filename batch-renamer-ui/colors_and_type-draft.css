@@ -1,0 +1,145 @@
+/* Renamer Batch UI — fresh/clean token contract (light + dark) */
+
+:root {
+  /* Brand primary scale — sky/cyan */
+  --renamer-primary-50: #f0f9ff;
+  --renamer-primary-100: #e0f2fe;
+  --renamer-primary-200: #bae6fd;
+  --renamer-primary-300: #7dd3fc;
+  --renamer-primary-400: #38bdf8;
+  --renamer-primary-500: #0ea5e9;
+  --renamer-primary-600: #0284c7;
+  --renamer-primary-700: #0369a1;
+  --renamer-primary-800: #075985;
+  --renamer-primary-900: #0c4a6e;
+
+  /* Light neutral scale */
+  --renamer-neutral-0: #ffffff;
+  --renamer-neutral-50: #f8fafc;
+  --renamer-neutral-100: #f1f5f9;
+  --renamer-neutral-200: #e2e8f0;
+  --renamer-neutral-300: #cbd5e1;
+  --renamer-neutral-400: #94a3b8;
+  --renamer-neutral-500: #64748b;
+  --renamer-neutral-600: #475569;
+  --renamer-neutral-700: #334155;
+  --renamer-neutral-800: #1e293b;
+  --renamer-neutral-900: #0f172a;
+
+  /* Light semantic aliases */
+  --renamer-background: var(--renamer-neutral-50);
+  --renamer-foreground: var(--renamer-neutral-900);
+  --renamer-card: var(--renamer-neutral-0);
+  --renamer-card-foreground: var(--renamer-neutral-900);
+  --renamer-popover: var(--renamer-neutral-0);
+  --renamer-popover-foreground: var(--renamer-neutral-900);
+  --renamer-primary: var(--renamer-primary-500);
+  --renamer-primary-foreground: var(--renamer-neutral-0);
+  --renamer-muted: var(--renamer-neutral-100);
+  --renamer-muted-foreground: var(--renamer-neutral-500);
+  --renamer-border: var(--renamer-neutral-200);
+  --renamer-input: var(--renamer-neutral-0);
+  --renamer-ring: var(--renamer-primary-400);
+  --renamer-radius-sm: 6px;
+  --renamer-radius-md: 10px;
+  --renamer-radius-lg: 14px;
+  --renamer-radius-xl: 18px;
+
+  --renamer-surface: var(--renamer-card);
+  --renamer-surface-2: var(--renamer-neutral-100);
+  --renamer-ink: var(--renamer-foreground);
+  --renamer-ink-2: var(--renamer-neutral-600);
+  --renamer-ink-3: var(--renamer-neutral-400);
+  --renamer-line: var(--renamer-border);
+
+  --renamer-state-success: #10b981;
+  --renamer-state-warning: #f59e0b;
+  --renamer-state-error: #f43f5e;
+  --renamer-state-info: #0ea5e9;
+
+  --renamer-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.02);
+  --renamer-shadow-2: 0 6px 16px -6px rgba(14, 165, 233, 0.12);
+
+  --renamer-font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --renamer-font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+html.dark {
+  --renamer-primary-50: #082f49;
+  --renamer-primary-100: #0c4a6e;
+  --renamer-primary-200: #075985;
+  --renamer-primary-300: #0369a1;
+  --renamer-primary-400: #0284c7;
+  --renamer-primary-500: #0ea5e9;
+  --renamer-primary-600: #38bdf8;
+  --renamer-primary-700: #7dd3fc;
+  --renamer-primary-800: #bae6fd;
+  --renamer-primary-900: #e0f2fe;
+
+  --renamer-neutral-0: #18181b;
+  --renamer-neutral-50: #0b0b0f;
+  --renamer-neutral-100: #14141a;
+  --renamer-neutral-200: #1e1e24;
+  --renamer-neutral-300: #27272a;
+  --renamer-neutral-400: #52525b;
+  --renamer-neutral-500: #71717a;
+  --renamer-neutral-600: #a1a1aa;
+  --renamer-neutral-700: #d4d4d8;
+  --renamer-neutral-800: #e4e4e7;
+  --renamer-neutral-900: #f4f4f5;
+
+  --renamer-background: var(--renamer-neutral-50);
+  --renamer-foreground: var(--renamer-neutral-900);
+  --renamer-card: var(--renamer-neutral-100);
+  --renamer-card-foreground: var(--renamer-neutral-900);
+  --renamer-popover: var(--renamer-neutral-100);
+  --renamer-popover-foreground: var(--renamer-neutral-900);
+  --renamer-primary: var(--renamer-primary-500);
+  --renamer-primary-foreground: var(--renamer-neutral-0);
+  --renamer-muted: var(--renamer-neutral-200);
+  --renamer-muted-foreground: var(--renamer-neutral-500);
+  --renamer-border: var(--renamer-neutral-200);
+  --renamer-input: var(--renamer-neutral-200);
+  --renamer-ring: var(--renamer-primary-400);
+
+  --renamer-surface: var(--renamer-card);
+  --renamer-surface-2: var(--renamer-neutral-200);
+  --renamer-ink: var(--renamer-foreground);
+  --renamer-ink-2: var(--renamer-neutral-600);
+  --renamer-ink-3: var(--renamer-neutral-500);
+  --renamer-line: var(--renamer-border);
+
+  --renamer-state-success: #34d399;
+  --renamer-state-warning: #fbbf24;
+  --renamer-state-error: #fb7185;
+  --renamer-state-info: #38bdf8;
+
+  --renamer-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02);
+  --renamer-shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--renamer-font-sans);
+  background: var(--renamer-background);
+  color: var(--renamer-ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, kbd, .font-mono {
+  font-family: var(--renamer-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font-family: inherit;
+}

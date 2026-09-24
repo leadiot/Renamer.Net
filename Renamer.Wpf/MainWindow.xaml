@@ -1,12 +1,155 @@
-﻿<Window x:Class="Renamer.Wpf.MainWindow"
+<Window x:Class="Renamer.Wpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Renamer.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="批量重命名" Height="650" Width="1100"
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="Microsoft YaHei, SimHei, sans-serif"
+        WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <!-- 表达式编辑栏 -->
+        <Border Grid.Row="0"
+                Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,12">
+            <DockPanel LastChildFill="True" VerticalAlignment="Center">
+                <TextBlock Text="更名表达式："
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"
+                           FontSize="13"
+                           Foreground="{StaticResource Ink2Brush}"/>
+                <Button x:Name="ExpressionMenuButton"
+                        Content="M"
+                        Style="{StaticResource IconCircleButtonStyle}"
+                        DockPanel.Dock="Right"
+                        Margin="10,0,0,0"
+                        Click="ExpressionMenuButton_Click"/>
+                <TextBox x:Name="ExpressionTextBox"
+                         Style="{StaticResource ExpressionTextBoxStyle}"
+                         Text="&lt;*&gt;_&lt;|*3&gt;.&lt;?&gt;"/>
+            </DockPanel>
+        </Border>
+
+        <!-- 快捷标签 -->
+        <Border Grid.Row="1"
+                Background="{StaticResource Surface2Brush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="{}+" Tag="{}+" Style="{StaticResource ChipButtonStyle}" Margin="0,0,8,0" Click="QuickTagAdd_Click"/>
+                <Button Content="{}{name}" Tag="&lt;*&gt;" Style="{StaticResource ChipButtonStyle}" Margin="0,0,8,0" Click="QuickTag_Click"/>
+                <Button Content="{}{ext}" Tag="&lt;?&gt;" Style="{StaticResource ChipButtonStyle}" Margin="0,0,8,0" Click="QuickTag_Click"/>
+                <Button Content="{}{index}" Tag="&lt;|*3&gt;" Style="{StaticResource ChipButtonStyle}" Margin="0,0,8,0" Click="QuickTag_Click"/>
+                <Button Content="{}{date}" Tag="&lt;|&quot;&gt;" Style="{StaticResource ChipButtonStyle}" Margin="0,0,8,0" Click="QuickTag_Click"/>
+                <Button Content="{}{original}" Tag="&lt;*&gt;" Style="{StaticResource ChipButtonStyle}" Click="QuickTag_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="2"
+                Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,10">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="AddFolderButton"
+                            Content="添加目录"
+                            Style="{StaticResource PillButtonStyle}"
+                            Margin="0,0,10,0"
+                            Click="AddFolderButton_Click"/>
+                    <Button x:Name="AddFileButton"
+                            Content="添加文件"
+                            Style="{StaticResource PillButtonStyle}"
+                            Margin="0,0,10,0"
+                            Click="AddFileButton_Click"/>
+                    <Button x:Name="RefreshPreviewButton"
+                            Content="刷新预览"
+                            Style="{StaticResource PillButtonStyle}"
+                            Margin="0,0,10,0"
+                            Click="RefreshPreviewButton_Click"/>
+                    <Button x:Name="ExecuteRenameButton"
+                            Content="执行更名"
+                            Style="{StaticResource PillButtonStyle}"
+                            Click="ExecuteRenameButton_Click"/>
+                </StackPanel>
+                <Button x:Name="ExportButton"
+                        Content="导出"
+                        Style="{StaticResource PillButtonStyle}"
+                        HorizontalAlignment="Right"
+                        Click="ExportButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- 结果表格 -->
+        <Border Grid.Row="3" Background="{StaticResource CardBrush}">
+            <DataGrid x:Name="ResultDataGrid"
+                      Style="{StaticResource FreshDataGridStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="原始名称" Binding="{Binding OriginalName}" Width="2*"/>
+                    <DataGridTextColumn Header="结果名称" Binding="{Binding ResultName}" Width="2*"/>
+                    <DataGridTextColumn Header="异常信息" Binding="{Binding ExceptionMessage}" Width="1.5*"/>
+                    <DataGridTextColumn Header="执行结果" Binding="{Binding ResultStatus}" Width="0.8*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
+                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- 状态栏 -->
+        <Border Grid.Row="4"
+                Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,8">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="已选择"
+                               FontSize="12"
+                               Foreground="{StaticResource Ink2Brush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="SelectedCountText"
+                               Text="6"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource InkBrush}"
+                               Margin="4,0,0,0"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="个文件"
+                               FontSize="12"
+                               Foreground="{StaticResource Ink2Brush}"
+                               Margin="0,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="按 Ctrl+R 刷新预览"
+                       FontSize="12"
+                       Foreground="{StaticResource Ink3Brush}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

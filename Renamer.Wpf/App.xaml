@@ -1,9 +1,261 @@
-﻿<Application x:Class="Renamer.Wpf.App"
+<Application x:Class="Renamer.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Renamer.Wpf"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- ========================================= -->
+        <!-- 颜色令牌（与 batch-renamer-ui-draft 一致） -->
+        <!-- ========================================= -->
+        <Color x:Key="Primary50">#f0f9ff</Color>
+        <Color x:Key="Primary100">#e0f2fe</Color>
+        <Color x:Key="Primary200">#bae6fd</Color>
+        <Color x:Key="Primary300">#7dd3fc</Color>
+        <Color x:Key="Primary400">#38bdf8</Color>
+        <Color x:Key="Primary500">#0ea5e9</Color>
+        <Color x:Key="Primary600">#0284c7</Color>
+        <Color x:Key="Primary700">#0369a1</Color>
+        <Color x:Key="Primary800">#075985</Color>
+        <Color x:Key="Primary900">#0c4a6e</Color>
+
+        <Color x:Key="Neutral0">#ffffff</Color>
+        <Color x:Key="Neutral50">#f8fafc</Color>
+        <Color x:Key="Neutral100">#f1f5f9</Color>
+        <Color x:Key="Neutral200">#e2e8f0</Color>
+        <Color x:Key="Neutral300">#cbd5e1</Color>
+        <Color x:Key="Neutral400">#94a3b8</Color>
+        <Color x:Key="Neutral500">#64748b</Color>
+        <Color x:Key="Neutral600">#475569</Color>
+        <Color x:Key="Neutral700">#334155</Color>
+        <Color x:Key="Neutral800">#1e293b</Color>
+        <Color x:Key="Neutral900">#0f172a</Color>
+
+        <Color x:Key="SuccessColor">#10b981</Color>
+        <Color x:Key="WarningColor">#f59e0b</Color>
+        <Color x:Key="ErrorColor">#f43f5e</Color>
+
+        <!-- 刷子 -->
+        <SolidColorBrush x:Key="Primary50Brush" Color="{StaticResource Primary50}"/>
+        <SolidColorBrush x:Key="Primary100Brush" Color="{StaticResource Primary100}"/>
+        <SolidColorBrush x:Key="Primary200Brush" Color="{StaticResource Primary200}"/>
+        <SolidColorBrush x:Key="Primary300Brush" Color="{StaticResource Primary300}"/>
+        <SolidColorBrush x:Key="Primary400Brush" Color="{StaticResource Primary400}"/>
+        <SolidColorBrush x:Key="Primary500Brush" Color="{StaticResource Primary500}"/>
+        <SolidColorBrush x:Key="Primary600Brush" Color="{StaticResource Primary600}"/>
+        <SolidColorBrush x:Key="Primary700Brush" Color="{StaticResource Primary700}"/>
+        <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource Neutral0}"/>
+
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource Neutral50}"/>
+        <SolidColorBrush x:Key="CardBrush" Color="{StaticResource Neutral0}"/>
+        <SolidColorBrush x:Key="Surface2Brush" Color="{StaticResource Neutral100}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Neutral200}"/>
+        <SolidColorBrush x:Key="InkBrush" Color="{StaticResource Neutral900}"/>
+        <SolidColorBrush x:Key="Ink2Brush" Color="{StaticResource Neutral600}"/>
+        <SolidColorBrush x:Key="Ink3Brush" Color="{StaticResource Neutral400}"/>
+        <SolidColorBrush x:Key="InputBorderBrush" Color="{StaticResource Neutral300}"/>
+
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+
+        <LinearGradientBrush x:Key="ToolbarButtonBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="{StaticResource Primary400}"/>
+            <GradientStop Offset="1" Color="{StaticResource Primary600}"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ToolbarButtonHoverBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="{StaticResource Primary300}"/>
+            <GradientStop Offset="1" Color="{StaticResource Primary500}"/>
+        </LinearGradientBrush>
+
+        <!-- 阴影效果 -->
+        <DropShadowEffect x:Key="Shadow1" Color="Black" Opacity="0.08" BlurRadius="4" ShadowDepth="1" Direction="270"/>
+        <DropShadowEffect x:Key="Shadow2" Color="Black" Opacity="0.12" BlurRadius="8" ShadowDepth="2" Direction="270"/>
+
+        <!-- 字体 -->
+        <FontFamily x:Key="MonoFont">Consolas, "Courier New", monospace</FontFamily>
+
+        <!-- 工具栏胶囊按钮 -->
+        <Style x:Key="PillButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{StaticResource Primary500Brush}"
+                                CornerRadius="9999"
+                                Padding="{TemplateBinding Padding}"
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Primary400Brush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Primary600Brush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 圆形图标按钮（M） -->
+        <Style x:Key="IconCircleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                            <Ellipse x:Name="Bg" Fill="{StaticResource Primary500Brush}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Fill" Value="{StaticResource Primary400Brush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Fill" Value="{StaticResource Primary600Brush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 快捷标签 chip -->
+        <Style x:Key="ChipButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Primary700Brush}"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{StaticResource Primary50Brush}"
+                                BorderBrush="{StaticResource Primary200Brush}"
+                                BorderThickness="1"
+                                CornerRadius="9999"
+                                Padding="{TemplateBinding Padding}"
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Primary100Brush}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Primary300Brush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Primary200Brush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 输入框 -->
+        <Style x:Key="ExpressionTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0" Padding="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- DataGrid 样式 -->
+        <Style x:Key="FreshDataGridStyle" TargetType="DataGrid">
+            <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="RowBackground" Value="{StaticResource CardBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{StaticResource Primary50Brush}"/>
+            <Setter Property="GridLinesVisibility" Value="Vertical"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="SelectionMode" Value="Extended"/>
+            <Setter Property="ColumnHeaderStyle" Value="{DynamicResource FreshColumnHeaderStyle}"/>
+            <Setter Property="CellStyle" Value="{DynamicResource FreshCellStyle}"/>
+            <Setter Property="RowStyle" Value="{DynamicResource FreshRowStyle}"/>
+        </Style>
+
+        <Style x:Key="FreshColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource Surface2Brush}"/>
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FreshCellStyle" TargetType="DataGridCell">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FreshRowStyle" TargetType="DataGridRow">
+            <Setter Property="Height" Value="40"/>
+        </Style>
     </Application.Resources>
 </Application>

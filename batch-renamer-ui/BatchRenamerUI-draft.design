@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "id": "page-index",
+      "title": "批量重命名 - 重设计稿",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790208680000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-a2a5b36e",
+          "measuredAt": 1790211636688
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/index.html",
+        "interactions": []
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "批量重命名工具界面 - 重设计稿"
+  }
+}
