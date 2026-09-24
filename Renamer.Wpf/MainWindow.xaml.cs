@@ -24,7 +24,50 @@ namespace Renamer.Wpf
         {
             InitializeComponent();
             ResultDataGrid.ItemsSource = FileItems;
+            LoadTemplates();
             UpdateStatus();
+        }
+
+        private void LoadTemplates()
+        {
+            string templatePath = System.IO.Path.Combine(AppContext.BaseDirectory, "template.json");
+            if (!File.Exists(templatePath)) return;
+
+            try
+            {
+                var json = File.ReadAllText(templatePath);
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var templates = System.Text.Json.JsonSerializer.Deserialize<List<TemplateItem>>(json, options);
+                if (templates == null || templates.Count == 0) return;
+
+                var menu = new System.Windows.Controls.ContextMenu();
+                foreach (var t in templates)
+                {
+                    var item = new System.Windows.Controls.MenuItem
+                    {
+                        Header = $"{t.Name}    {t.Pattern}",
+                        Tag = t.Pattern,
+                        FontFamily = (System.Windows.Media.FontFamily)FindResource("MonoFont")
+                    };
+                    item.Click += TemplateMenuItem_Click;
+                    menu.Items.Add(item);
+                }
+                ExpressionMenuButton.ContextMenu = menu;
+            }
+            catch
+            {
+                // 模板加载失败不阻断启动
+            }
+        }
+
+        private void TemplateMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.MenuItem mi && mi.Tag is string pattern)
+            {
+                ExpressionTextBox.Text = pattern;
+                ExpressionTextBox.Focus();
+                ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+            }
         }
 
         private void UpdateStatus()
@@ -175,8 +218,16 @@ namespace Renamer.Wpf
 
         private void ExpressionMenuButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: 弹出表达式帮助菜单
-            System.Windows.MessageBox.Show("表达式帮助（待完善）：\n<*>=原文件名，<?>=扩展名，<|*3>=三位序号，<|\"\">=时间，<.>=条件点号", "表达式");
+            if (ExpressionMenuButton.ContextMenu != null)
+            {
+                ExpressionMenuButton.ContextMenu.PlacementTarget = ExpressionMenuButton;
+                ExpressionMenuButton.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                ExpressionMenuButton.ContextMenu.IsOpen = true;
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("未找到模板文件 template.json", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void QuickTagAdd_Click(object sender, RoutedEventArgs e)
@@ -300,5 +351,11 @@ namespace Renamer.Wpf
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class TemplateItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Pattern { get; set; } = string.Empty;
     }
 }

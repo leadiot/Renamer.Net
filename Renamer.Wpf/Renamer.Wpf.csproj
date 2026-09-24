@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Renamer.Net\Renamer.Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="template.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
