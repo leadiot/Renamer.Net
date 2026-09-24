@@ -19,13 +19,25 @@ namespace Renamer.Wpf
     public partial class MainWindow : Window
     {
         public ObservableCollection<RenameItem> FileItems { get; } = new();
+        public ObservableCollection<QuickTagItem> QuickTags { get; } = new();
 
         public MainWindow()
         {
             InitializeComponent();
             ResultDataGrid.ItemsSource = FileItems;
+            QuickTagList.ItemsSource = QuickTags;
             LoadTemplates();
+            InitDefaultQuickTags();
             UpdateStatus();
+        }
+
+        private void InitDefaultQuickTags()
+        {
+            QuickTags.Add(new QuickTagItem { Name = "name", Pattern = "<*>" });
+            QuickTags.Add(new QuickTagItem { Name = "ext", Pattern = "<?>" });
+            QuickTags.Add(new QuickTagItem { Name = "index", Pattern = "<|*3>" });
+            QuickTags.Add(new QuickTagItem { Name = "date", Pattern = "<|\">" });
+            QuickTags.Add(new QuickTagItem { Name = "sep", Pattern = "<.>" });
         }
 
         private void LoadTemplates()
@@ -232,11 +244,14 @@ namespace Renamer.Wpf
 
         private void QuickTagAdd_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: 添加自定义快捷标签
-            System.Windows.MessageBox.Show("添加自定义标签（待实现）");
+            var (name, pattern, ok) = ShowTagEditor(null, null);
+            if (ok && !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(pattern))
+            {
+                QuickTags.Add(new QuickTagItem { Name = name.Trim(), Pattern = pattern.Trim() });
+            }
         }
 
-        private void QuickTag_Click(object sender, RoutedEventArgs e)
+        private void QuickTagItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is System.Windows.Controls.Button btn && btn.Tag is string tag)
             {
@@ -244,6 +259,116 @@ namespace Renamer.Wpf
                 ExpressionTextBox.Focus();
                 ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
             }
+        }
+
+        private void QuickTagItem_RightClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            {
+                var menu = new System.Windows.Controls.ContextMenu();
+
+                var insertItem = new System.Windows.Controls.MenuItem { Header = "插入到表达式" };
+                insertItem.Click += (s, _) =>
+                {
+                    ExpressionTextBox.Text += item.Pattern;
+                    ExpressionTextBox.Focus();
+                    ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+                };
+                menu.Items.Add(insertItem);
+
+                var editItem = new System.Windows.Controls.MenuItem { Header = "编辑..." };
+                editItem.Click += (s, _) =>
+                {
+                    var (name, pattern, ok) = ShowTagEditor(item.Name, item.Pattern);
+                    if (ok)
+                    {
+                        item.Name = name.Trim();
+                        item.Pattern = pattern.Trim();
+                    }
+                };
+                menu.Items.Add(editItem);
+
+                var deleteItem = new System.Windows.Controls.MenuItem { Header = "删除" };
+                deleteItem.Click += (s, _) => QuickTags.Remove(item);
+                menu.Items.Add(deleteItem);
+
+                menu.PlacementTarget = btn;
+                menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                menu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+
+        private (string name, string pattern, bool ok) ShowTagEditor(string? initName, string? initPattern)
+        {
+            var dlg = new Window
+            {
+                Title = initName == null ? "添加快捷表达式" : "编辑快捷表达式",
+                Width = 360,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                ResizeMode = ResizeMode.NoResize,
+                Background = (System.Windows.Media.Brush)FindResource("SurfaceBrush"),
+                FontFamily = (System.Windows.Media.FontFamily)FindResource("AppFont")
+            };
+
+            var nameBox = new System.Windows.Controls.TextBox
+            {
+                Style = (Style)FindResource("OutlinedTextBox"),
+                Text = initName ?? "",
+                Margin = new Thickness(16, 16, 16, 4)
+            };
+            var patternBox = new System.Windows.Controls.TextBox
+            {
+                Style = (Style)FindResource("OutlinedTextBox"),
+                Text = initPattern ?? "",
+                Margin = new Thickness(16, 4, 16, 8),
+                FontFamily = (System.Windows.Media.FontFamily)FindResource("MonoFont")
+            };
+            var btnPanel = new StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+                Margin = new Thickness(16, 0, 16, 16)
+            };
+            var okBtn = new System.Windows.Controls.Button
+            {
+                Style = (Style)FindResource("FilledButton"),
+                Content = "确定",
+                Margin = new Thickness(0, 0, 8, 0)
+            };
+            var cancelBtn = new System.Windows.Controls.Button
+            {
+                Style = (Style)FindResource("OutlinedButton"),
+                Content = "取消"
+            };
+            btnPanel.Children.Add(okBtn);
+            btnPanel.Children.Add(cancelBtn);
+
+            var panel = new StackPanel();
+            panel.Children.Add(new TextBlock { Text = "名称", Margin = new Thickness(16, 16, 16, 2), Foreground = (System.Windows.Media.Brush)FindResource("OnSurfaceVariantBrush") });
+            panel.Children.Add(nameBox);
+            panel.Children.Add(new TextBlock { Text = "表达式", Margin = new Thickness(16, 4, 16, 2), Foreground = (System.Windows.Media.Brush)FindResource("OnSurfaceVariantBrush") });
+            panel.Children.Add(patternBox);
+            panel.Children.Add(btnPanel);
+            dlg.Content = panel;
+
+            string resultName = initName ?? "";
+            string resultPattern = initPattern ?? "";
+            bool confirmed = false;
+
+            okBtn.Click += (s, _) => { resultName = nameBox.Text; resultPattern = patternBox.Text; confirmed = true; dlg.Close(); };
+            cancelBtn.Click += (s, _) => dlg.Close();
+
+            dlg.KeyDown += (s, ev) =>
+            {
+                if (ev.Key == Key.Enter) { resultName = nameBox.Text; resultPattern = patternBox.Text; confirmed = true; dlg.Close(); }
+                if (ev.Key == Key.Escape) dlg.Close();
+            };
+
+            dlg.ShowDialog();
+            return (resultName, resultPattern, confirmed);
         }
 
         protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
@@ -357,5 +482,30 @@ namespace Renamer.Wpf
     {
         public string Name { get; set; } = string.Empty;
         public string Pattern { get; set; } = string.Empty;
+    }
+
+    public class QuickTagItem : INotifyPropertyChanged
+    {
+        private string _name = string.Empty;
+        private string _pattern = string.Empty;
+
+        public string Name
+        {
+            get => _name;
+            set { _name = value; OnPropertyChanged(nameof(Name)); }
+        }
+
+        public string Pattern
+        {
+            get => _pattern;
+            set { _pattern = value; OnPropertyChanged(nameof(Pattern)); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

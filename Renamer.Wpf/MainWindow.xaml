@@ -44,18 +44,43 @@
             </DockPanel>
         </Border>
 
-        <!-- 快捷标签 -->
-        <StackPanel Grid.Row="1"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    Margin="0,0,0,12">
-            <Button Content="+" Tag="" Style="{StaticResource ChipButton}" Margin="0,0,8,0" Click="QuickTagAdd_Click"/>
-            <Button Content="name" Tag="&lt;*&gt;" Style="{StaticResource ChipButton}" Margin="0,0,8,0" Click="QuickTag_Click"/>
-            <Button Content="ext" Tag="&lt;?&gt;" Style="{StaticResource ChipButton}" Margin="0,0,8,0" Click="QuickTag_Click"/>
-            <Button Content="index" Tag="&lt;|*3&gt;" Style="{StaticResource ChipButton}" Margin="0,0,8,0" Click="QuickTag_Click"/>
-            <Button Content="date" Tag="&lt;|&quot;&gt;" Style="{StaticResource ChipButton}" Margin="0,0,8,0" Click="QuickTag_Click"/>
-            <Button Content="sep" Tag="&lt;.&gt;" Style="{StaticResource ChipButton}" Click="QuickTag_Click"/>
-        </StackPanel>
+        <!-- 快捷表达式列表 -->
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    Content="+"
+                    Style="{StaticResource ChipButton}"
+                    Margin="0,0,8,0"
+                    Click="QuickTagAdd_Click"/>
+            <ItemsControl Grid.Column="1"
+                          x:Name="QuickTagList"
+                          VerticalAlignment="Center"
+                          HorizontalContentAlignment="Center">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding Name}"
+                                Tag="{Binding Pattern}"
+                                Style="{StaticResource ChipButton}"
+                                Margin="0,0,8,0"
+                                Click="QuickTagItem_Click"
+                                MouseRightButtonUp="QuickTagItem_RightClick"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Grid.Column="2"
+                    Content="+"
+                    Style="{StaticResource ChipButton}"
+                    Click="QuickTagAdd_Click"/>
+        </Grid>
 
         <!-- 工具栏 -->
         <Grid Grid.Row="2" Margin="0,0,0,12">
