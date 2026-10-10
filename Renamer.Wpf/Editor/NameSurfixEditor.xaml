@@ -1,4 +1,4 @@
-<Window x:Class="Renamer.Wpf.Editor.PrefixEditor"
+<Window x:Class="Renamer.Wpf.Editor.NameSurfixEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:editor="clr-namespace:Renamer.Wpf.Editor"

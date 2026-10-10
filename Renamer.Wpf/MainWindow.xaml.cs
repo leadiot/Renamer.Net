@@ -1,6 +1,5 @@
 using Com.Scm.Filexp.Rename.Dvo;
 using Com.Scm.Filexp.Rename.Dvo.Pattern;
-using Com.Scm.Renamer.Pattern;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -317,11 +316,11 @@ namespace Renamer.Wpf
             {
                 case RenamerCore.PatternType.Prefix:
                     pattern = new NamePrefixPattern();
-                    ok = new Editor.PrefixEditor((NamePrefixPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    ok = new Editor.NamePrefixEditor((NamePrefixPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
                 case RenamerCore.PatternType.Suffix:
                     pattern = new NameSuffixPattern();
-                    ok = new Editor.SurfixEditor((NameSuffixPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    ok = new Editor.NameSurfixEditor((NameSuffixPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
                 case RenamerCore.PatternType.Text:
                     pattern = new TextPattern();
@@ -554,8 +553,8 @@ namespace Renamer.Wpf
             if (item.Pattern == null) return;
             bool ok = item.Pattern.Type switch
             {
-                RenamerCore.PatternType.Prefix => new Editor.PrefixEditor((NamePrefixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Suffix => new Editor.SurfixEditor((NameSuffixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                RenamerCore.PatternType.Prefix => new Editor.NamePrefixEditor((NamePrefixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                RenamerCore.PatternType.Suffix => new Editor.NameSurfixEditor((NameSuffixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
                 RenamerCore.PatternType.Text => new Editor.TextEditor((TextPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
                 RenamerCore.PatternType.Number => new Editor.NumberEditor((NumberPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
                 RenamerCore.PatternType.Letter => new Editor.LetterEditor((LetterPattern)item.Pattern) { Owner = this }.ShowDialog() == true,

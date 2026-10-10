@@ -1,6 +1,6 @@
+using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using System.Windows;
 using System.Windows.Input;
-using Com.Scm.Filexp.Rename.Dvo.Pattern;
 
 namespace Renamer.Wpf.Editor
 {

@@ -8,10 +8,10 @@
     <Compile Update="Editor\NumberEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Editor\PrefixEditor.xaml.cs">
+    <Compile Update="Editor\NamePrefixEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Editor\SurfixEditor.xaml.cs">
+    <Compile Update="Editor\NameSurfixEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Editor\TextEditor.xaml.cs">

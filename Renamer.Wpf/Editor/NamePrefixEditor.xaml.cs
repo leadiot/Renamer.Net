@@ -1,6 +1,6 @@
+using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using System.Windows;
 using System.Windows.Input;
-using Com.Scm.Filexp.Rename.Dvo.Pattern;
 
 namespace Renamer.Wpf.Editor
 {
@@ -8,11 +8,11 @@ namespace Renamer.Wpf.Editor
     /// 文件前缀编辑窗体：编辑 <see cref="NamePrefixPattern"/> 的文字操作配置。
     /// 字段面板复用 <see cref="NameEditor"/>；确认后仅回写内存模型，由调用方负责 Encode 与刷新。
     /// </summary>
-    public partial class PrefixEditor : Window
+    public partial class NamePrefixEditor : Window
     {
         private readonly NamePrefixPattern _pattern;
 
-        public PrefixEditor(NamePrefixPattern pattern)
+        public NamePrefixEditor(NamePrefixPattern pattern)
         {
             _pattern = pattern;
             InitializeComponent();
