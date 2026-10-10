@@ -1,6 +1,6 @@
 using Com.Scm.Renamer.Pattern;
 
-namespace Renamer.Wpf.Editor
+namespace Com.Scm.Renamer.Editor
 {
     /// <summary>
     /// 名称字段编辑面板：大小写、截取/插入/删除/替换等操作配置，

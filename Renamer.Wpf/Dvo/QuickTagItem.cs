@@ -1,13 +1,12 @@
 ﻿using Com.Scm.Filexp.Rename.Dvo;
 
-namespace Renamer.Wpf.Dvo
+namespace Com.Scm.Renamer.Dvo
 {
-
     public class QuickTagItem : ScmDvo
     {
-        private RenamerPattern? _pattern;
+        private RenamerPattern _pattern;
 
-        public RenamerPattern? Pattern
+        public RenamerPattern Pattern
         {
             get => _pattern;
             set

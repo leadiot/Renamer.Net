@@ -2,7 +2,7 @@ using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Renamer.Wpf.Editor
+namespace Com.Scm.Renamer.Editor
 {
     /// <summary>
     /// 时间信息编辑窗体：编辑 <see cref="TimePattern"/> 的时间来源与格式。

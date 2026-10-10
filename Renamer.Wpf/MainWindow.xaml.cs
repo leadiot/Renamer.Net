@@ -1,21 +1,22 @@
 using Com.Scm.Filexp.Rename.Dvo;
 using Com.Scm.Filexp.Rename.Dvo.Pattern;
+using Com.Scm.Renamer.Dto;
+using Com.Scm.Renamer.Dvo;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using RenamerCore = Com.Scm.Renamer;
 
-namespace Renamer.Wpf
+namespace Com.Scm.Renamer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<RenameItem> FileItems { get; } = new();
+        public ObservableCollection<FileItemDvo> FileItems { get; } = new();
         public ObservableCollection<QuickTagItem> QuickTags { get; } = new();
 
         public MainWindow()
@@ -119,28 +120,28 @@ namespace Renamer.Wpf
 
         private void AddFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            using var dialog = new System.Windows.Forms.FolderBrowserDialog
-            {
-                ShowNewFolderButton = false
-            };
+            //using var dialog = new System.Windows.Forms.FolderBrowserDialog
+            //{
+            //    ShowNewFolderButton = false
+            //};
 
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                string folder = dialog.SelectedPath;
-                try
-                {
-                    var files = Directory.EnumerateFiles(folder);
-                    foreach (string file in files)
-                    {
-                        AddFileInternal(file);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                UpdateStatus();
-            }
+            //if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            //{
+            //    string folder = dialog.SelectedPath;
+            //    try
+            //    {
+            //        var files = Directory.EnumerateFiles(folder);
+            //        foreach (string file in files)
+            //        {
+            //            AddFileInternal(file);
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            //    }
+            //    UpdateStatus();
+            //}
         }
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
@@ -168,7 +169,7 @@ namespace Renamer.Wpf
                 return;
             }
 
-            FileItems.Add(new RenameItem
+            FileItems.Add(new FileItemDvo
             {
                 Path = path,
                 OriginalName = System.IO.Path.GetFileName(path)
@@ -189,7 +190,7 @@ namespace Renamer.Wpf
             }
 
             var coreItems = FileItems.Select(x => x.ToCoreItem()).ToList();
-            RenamerCore.Renamer? renamer;
+            RenamerCore.Renamer renamer;
             try
             {
                 renamer = RenamerCore.Renamer.Compile(ExpressionTextBox.Text);
@@ -234,7 +235,7 @@ namespace Renamer.Wpf
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("原始名称,结果名称,执行结果,异常信息");
-                foreach (RenameItem item in FileItems)
+                foreach (FileItemDvo item in FileItems)
                 {
                     sb.AppendLine($"{EscapeCsv(item.OriginalName)},{EscapeCsv(item.ResultName ?? string.Empty)},{EscapeCsv(item.ResultStatus ?? string.Empty)},{EscapeCsv(item.ExceptionMessage ?? string.Empty)}");
                 }
@@ -360,11 +361,11 @@ namespace Renamer.Wpf
             showPattern();
         }
 
-        private QuickTagItem? _dragItem;
+        private QuickTagItem _dragItem;
         private System.Windows.Point _dragStartPoint;
         private bool _dragArmed;
         private bool _suppressNextChipClick;
-        private System.Windows.Controls.Grid? _dropHintGrid;
+        private System.Windows.Controls.Grid _dropHintGrid;
 
         private void QuickTagItem_Click(object sender, RoutedEventArgs e)
         {
@@ -508,7 +509,7 @@ namespace Renamer.Wpf
             }
         }
 
-        private static T? FindChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+        private static T FindChild<T>(DependencyObject parent, string name) where T : FrameworkElement
         {
             int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < count; i++)
@@ -586,7 +587,7 @@ namespace Renamer.Wpf
             }
 
             var coreItems = FileItems.Select(x => x.ToCoreItem()).ToList();
-            RenamerCore.Renamer? renamer;
+            RenamerCore.Renamer renamer;
             try
             {
                 renamer = RenamerCore.Renamer.Compile(ExpressionTextBox.Text);
@@ -602,119 +603,6 @@ namespace Renamer.Wpf
             {
                 FileItems[i].ApplyCoreItem(coreItems[i]);
             }
-        }
-    }
-
-    public class RenameItem : INotifyPropertyChanged
-    {
-        private string _path = string.Empty;
-        private string _originalName = string.Empty;
-        private string _resultName = string.Empty;
-        private string _exceptionMessage = string.Empty;
-        private string _resultStatus = string.Empty;
-
-        public string Path
-        {
-            get => _path;
-            set { _path = value; OnPropertyChanged(nameof(Path)); }
-        }
-
-        public string OriginalName
-        {
-            get => _originalName;
-            set { _originalName = value; OnPropertyChanged(nameof(OriginalName)); }
-        }
-
-        public string ResultName
-        {
-            get => _resultName;
-            set { _resultName = value; OnPropertyChanged(nameof(ResultName)); }
-        }
-
-        public string ExceptionMessage
-        {
-            get => _exceptionMessage;
-            set { _exceptionMessage = value; OnPropertyChanged(nameof(ExceptionMessage)); }
-        }
-
-        public string ResultStatus
-        {
-            get => _resultStatus;
-            set { _resultStatus = value; OnPropertyChanged(nameof(ResultStatus)); }
-        }
-
-        public RenamerCore.FileItem ToCoreItem()
-        {
-            return new RenamerCore.FileItem
-            {
-                Path = Path,
-                SrcName = OriginalName
-            };
-        }
-
-        public void ApplyCoreItem(RenamerCore.FileItem item)
-        {
-            Path = item.Path ?? string.Empty;
-            OriginalName = item.SrcName ?? System.IO.Path.GetFileName(item.Path ?? string.Empty);
-            ResultName = item.DstName ?? string.Empty;
-            ExceptionMessage = item.IssueMessage ?? string.Empty;
-            ResultStatus = item.Status switch
-            {
-                RenamerCore.RenameStatus.Ok => "成功",
-                RenamerCore.RenameStatus.NoChange => "跳过",
-                RenamerCore.RenameStatus.Resolved => "已消解",
-                RenamerCore.RenameStatus.Error => "失败",
-                _ => string.Empty
-            };
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    public class TemplateItem
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Pattern { get; set; } = string.Empty;
-    }
-
-    public class QuickTagItem : INotifyPropertyChanged
-    {
-        private RenamerPattern? _pattern;
-
-        public RenamerPattern? Pattern
-        {
-            get => _pattern;
-            set
-            {
-                _pattern = value;
-                OnPropertyChanged(nameof(Pattern));
-                OnPropertyChanged(nameof(Name));
-                OnPropertyChanged(nameof(Expression));
-            }
-        }
-
-        public string Name => _pattern is TextPattern t && !string.IsNullOrEmpty(t.Text)
-            ? t.Text
-            : _pattern?.Title ?? string.Empty;
-
-        public string Expression => _pattern?.Pattern ?? string.Empty;
-
-        public void Refresh()
-        {
-            OnPropertyChanged(nameof(Name));
-            OnPropertyChanged(nameof(Expression));
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

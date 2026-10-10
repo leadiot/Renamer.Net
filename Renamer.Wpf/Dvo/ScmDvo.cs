@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Renamer.Wpf.Dvo
+namespace Com.Scm.Renamer.Dvo
 {
     public class ScmDvo : INotifyPropertyChanged
     {

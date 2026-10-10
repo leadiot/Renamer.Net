@@ -1,4 +1,4 @@
-<Window x:Class="Renamer.Wpf.Editor.TimeEditor"
+<Window x:Class="Com.Scm.Renamer.Editor.TimeEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Width="420" Height="380"

@@ -2,7 +2,7 @@ using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Renamer.Wpf.Editor
+namespace Com.Scm.Renamer.Editor
 {
     /// <summary>
     /// 数字序列编辑窗体：编辑 <see cref="NumberPattern"/> 的位宽、起始值与步增量。

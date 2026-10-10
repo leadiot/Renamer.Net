@@ -2,7 +2,7 @@ using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Renamer.Wpf.Editor
+namespace Com.Scm.Renamer.Editor
 {
     /// <summary>
     /// 文件前缀编辑窗体：编辑 <see cref="NamePrefixPattern"/> 的文字操作配置。
