@@ -97,7 +97,6 @@ namespace Renamer.Wpf
         {
             using var dialog = new System.Windows.Forms.FolderBrowserDialog
             {
-                Description = "选择要重命名的文件所在目录",
                 ShowNewFolderButton = false
             };
 
@@ -315,9 +314,15 @@ namespace Renamer.Wpf
         {
             if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
             {
-                ExpressionTextBox.Text += item.Expression;
-                ExpressionTextBox.Focus();
-                ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+                EditQuickTag(item);
+            }
+        }
+
+        private void QuickTagDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            {
+                QuickTags.Remove(item);
             }
         }
 
@@ -335,14 +340,6 @@ namespace Renamer.Wpf
                     ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
                 };
                 menu.Items.Add(insertItem);
-
-                var editItem = new System.Windows.Controls.MenuItem { Header = "编辑..." };
-                editItem.Click += (s, _) => EditQuickTag(item);
-                menu.Items.Add(editItem);
-
-                var deleteItem = new System.Windows.Controls.MenuItem { Header = "删除" };
-                deleteItem.Click += (s, _) => QuickTags.Remove(item);
-                menu.Items.Add(deleteItem);
 
                 menu.PlacementTarget = btn;
                 menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;

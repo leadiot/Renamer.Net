@@ -67,12 +67,19 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Content="{Binding Name}"
-                                Tag="{Binding Expression}"
-                                Style="{StaticResource ChipButton}"
-                                Margin="0,0,8,0"
-                                Click="QuickTagItem_Click"
-                                MouseRightButtonUp="QuickTagItem_RightClick"/>
+                        <Grid Margin="0,8,8,0">
+                            <Button Content="{Binding Name}"
+                                    Style="{StaticResource ChipButton}"
+                                    ToolTip="点击编辑"
+                                    Click="QuickTagItem_Click"
+                                    MouseRightButtonUp="QuickTagItem_RightClick"/>
+                            <Button Content="✕"
+                                    Style="{StaticResource ChipCloseButton}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="0,-8,-8,0"
+                                    Click="QuickTagDelete_Click"/>
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
