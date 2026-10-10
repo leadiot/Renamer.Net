@@ -9,7 +9,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// 点开头文件 .gitignore 与无点文件视为无扩展名）。
     /// 典型用法：&lt;*&gt;&lt;.&gt;&lt;?&gt;，无扩展名文件不会产生尾随点。
     /// </summary>
-    internal class SeparatorPattern : RenamerPattern
+    public class SeparatorPattern : RenamerPattern
     {
         public SeparatorPattern()
         {

@@ -11,7 +11,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// |":format             当前时间 + 格式（唯一写法，裸格式 |"format 已移除）
     /// 缺省格式为 yyyyMMddHHmmss。
     /// </summary>
-    internal class TimePattern : RenamerPattern
+    public class TimePattern : RenamerPattern
     {
         public TimePattern()
         {
@@ -155,7 +155,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         }
     }
 
-    internal enum SourceEnum
+    public enum SourceEnum
     {
         /// <summary>
         /// 当前时间

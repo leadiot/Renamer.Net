@@ -31,7 +31,7 @@ namespace Com.Scm.Renamer.Pattern
     /// 左起定位点 p = i；右起定位点 p = n - i + 1。
     /// 左起截取 [i,j]；右起截取 [n-j+1, n-i+1]，保持原字符顺序。越界一律夹紧（clamp）。
     /// </summary>
-    internal class NamePattern : RenamerPattern
+    public class NamePattern : RenamerPattern
     {
         /// <summary>
         /// true 表示作用于扩展名（?），false 表示作用于文件名（*）

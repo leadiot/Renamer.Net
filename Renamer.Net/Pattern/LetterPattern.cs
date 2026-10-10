@@ -1,4 +1,4 @@
-﻿using Com.Scm.Renamer;
+using Com.Scm.Renamer;
 using System;
 using System.Globalization;
 using System.Text;
@@ -13,7 +13,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// |?charset[:length:start:step]    自定义字符集，charset 取到第一个 ':' 为止
     /// 序列按字符集长度做进制换算（a=0…z=25，其后为 ba、bb），length 为最小位宽，超出不截断。
     /// </summary>
-    internal class LetterPattern : RenamerPattern
+    public class LetterPattern : RenamerPattern
     {
         private static readonly char[] LowerAlphabet = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
         private static readonly char[] UpperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
@@ -189,7 +189,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         }
     }
 
-    internal class LowerLetterPattern : LetterPattern
+    public class LowerLetterPattern : LetterPattern
     {
         public LowerLetterPattern()
         {
@@ -199,7 +199,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         }
     }
 
-    internal class UpperLetterPattern : LetterPattern
+    public class UpperLetterPattern : LetterPattern
     {
         public UpperLetterPattern()
         {

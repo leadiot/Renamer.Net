@@ -9,7 +9,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// length 为最小位宽，不足左侧补 0；超出位宽时原样输出（不截断）。
     /// start 默认 0，step 默认 1，均支持负数；序列值 = start + step * 文件序号。
     /// </summary>
-    internal class NumberPattern : RenamerPattern
+    public class NumberPattern : RenamerPattern
     {
         public NumberPattern()
         {

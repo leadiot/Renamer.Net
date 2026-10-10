@@ -6,7 +6,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// <summary>
     /// 文件名称后缀表达式
     /// </summary>
-    internal class NameSuffixPattern : NamePattern
+    public class NameSuffixPattern : NamePattern
     {
         /// <summary>
         /// 保持不变

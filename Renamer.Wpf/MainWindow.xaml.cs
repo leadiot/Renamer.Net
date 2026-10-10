@@ -1,15 +1,15 @@
-using Microsoft.Win32;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 
 using System.Windows.Input;
 using RenamerCore = Com.Scm.Renamer;
+using Com.Scm.Filexp.Rename.Dvo;
+using Com.Scm.Filexp.Rename.Dvo.Pattern;
+using Com.Scm.Renamer.Pattern;
 
 namespace Renamer.Wpf
 {
@@ -33,11 +33,17 @@ namespace Renamer.Wpf
 
         private void InitDefaultQuickTags()
         {
-            QuickTags.Add(new QuickTagItem { Name = "name", Pattern = "<*>" });
-            QuickTags.Add(new QuickTagItem { Name = "ext", Pattern = "<?>" });
-            QuickTags.Add(new QuickTagItem { Name = "index", Pattern = "<|*3>" });
-            QuickTags.Add(new QuickTagItem { Name = "date", Pattern = "<|\">" });
-            QuickTags.Add(new QuickTagItem { Name = "sep", Pattern = "<.>" });
+            var name = new NamePrefixPattern();
+            var ext = new NameSuffixPattern();
+            var index = new NumberPattern { Length = 3 };
+            var date = new TimePattern();
+            var sep = new SeparatorPattern();
+            name.Encode(); ext.Encode(); index.Encode(); date.Encode(); sep.Encode();
+            QuickTags.Add(new QuickTagItem { Pattern = name });
+            QuickTags.Add(new QuickTagItem { Pattern = ext });
+            QuickTags.Add(new QuickTagItem { Pattern = index });
+            QuickTags.Add(new QuickTagItem { Pattern = date });
+            QuickTags.Add(new QuickTagItem { Pattern = sep });
         }
 
         private void LoadTemplates()
@@ -244,18 +250,72 @@ namespace Renamer.Wpf
 
         private void QuickTagAdd_Click(object sender, RoutedEventArgs e)
         {
-            var (name, pattern, ok) = ShowTagEditor(null, null);
-            if (ok && !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(pattern))
+            var menu = new System.Windows.Controls.ContextMenu();
+            AddTypeMenu(menu, "文件前缀", RenamerCore.PatternType.Prefix);
+            AddTypeMenu(menu, "文件后缀", RenamerCore.PatternType.Suffix);
+            AddTypeMenu(menu, "数字序列", RenamerCore.PatternType.Number);
+            AddTypeMenu(menu, "字符序列", RenamerCore.PatternType.Letter);
+            AddTypeMenu(menu, "时间信息", RenamerCore.PatternType.Time);
+            AddTypeMenu(menu, "条件分隔符", RenamerCore.PatternType.Separator);
+            menu.PlacementTarget = (UIElement)sender;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
+        }
+
+        private void AddTypeMenu(System.Windows.Controls.ContextMenu menu, string header, RenamerCore.PatternType type)
+        {
+            var item = new System.Windows.Controls.MenuItem { Header = header, Tag = type };
+            item.Click += (s, _) => OnPatternTypeChosen(type);
+            menu.Items.Add(item);
+        }
+
+        private void OnPatternTypeChosen(RenamerCore.PatternType type)
+        {
+            RenamerPattern pattern;
+            bool ok;
+            switch (type)
             {
-                QuickTags.Add(new QuickTagItem { Name = name.Trim(), Pattern = pattern.Trim() });
+                case RenamerCore.PatternType.Prefix:
+                    pattern = new NamePrefixPattern();
+                    ok = ShowNameEditor((NamePattern)pattern);
+                    break;
+                case RenamerCore.PatternType.Suffix:
+                    pattern = new NameSuffixPattern();
+                    ok = ShowNameEditor((NamePattern)pattern);
+                    break;
+                case RenamerCore.PatternType.Number:
+                    pattern = new NumberPattern();
+                    ok = ShowNumberEditor((NumberPattern)pattern);
+                    break;
+                case RenamerCore.PatternType.Letter:
+                    pattern = new LetterPattern();
+                    ok = ShowLetterEditor((LetterPattern)pattern);
+                    break;
+                case RenamerCore.PatternType.Time:
+                    pattern = new TimePattern();
+                    ok = ShowTimeEditor((TimePattern)pattern);
+                    break;
+                case RenamerCore.PatternType.Separator:
+                    pattern = new SeparatorPattern();
+                    ok = true;
+                    break;
+                default:
+                    return;
             }
+            if (!ok) return;
+
+            pattern.Encode();
+            QuickTags.Add(new QuickTagItem { Pattern = pattern });
+            ExpressionTextBox.Text = pattern.Pattern;
+            ExpressionTextBox.Focus();
+            ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
         }
 
         private void QuickTagItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is System.Windows.Controls.Button btn && btn.Tag is string tag)
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
             {
-                ExpressionTextBox.Text += tag;
+                ExpressionTextBox.Text += item.Expression;
                 ExpressionTextBox.Focus();
                 ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
             }
@@ -263,29 +323,21 @@ namespace Renamer.Wpf
 
         private void QuickTagItem_RightClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item && item.Pattern != null)
             {
                 var menu = new System.Windows.Controls.ContextMenu();
 
                 var insertItem = new System.Windows.Controls.MenuItem { Header = "插入到表达式" };
                 insertItem.Click += (s, _) =>
                 {
-                    ExpressionTextBox.Text += item.Pattern;
+                    ExpressionTextBox.Text += item.Expression;
                     ExpressionTextBox.Focus();
                     ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
                 };
                 menu.Items.Add(insertItem);
 
                 var editItem = new System.Windows.Controls.MenuItem { Header = "编辑..." };
-                editItem.Click += (s, _) =>
-                {
-                    var (name, pattern, ok) = ShowTagEditor(item.Name, item.Pattern);
-                    if (ok)
-                    {
-                        item.Name = name.Trim();
-                        item.Pattern = pattern.Trim();
-                    }
-                };
+                editItem.Click += (s, _) => EditQuickTag(item);
                 menu.Items.Add(editItem);
 
                 var deleteItem = new System.Windows.Controls.MenuItem { Header = "删除" };
@@ -299,13 +351,71 @@ namespace Renamer.Wpf
             }
         }
 
-        private (string name, string pattern, bool ok) ShowTagEditor(string? initName, string? initPattern)
+        private void EditQuickTag(QuickTagItem item)
+        {
+            if (item.Pattern == null) return;
+            bool ok = item.Pattern.Type switch
+            {
+                RenamerCore.PatternType.Prefix => ShowNameEditor((NamePattern)item.Pattern),
+                RenamerCore.PatternType.Suffix => ShowNameEditor((NamePattern)item.Pattern),
+                RenamerCore.PatternType.Number => ShowNumberEditor((NumberPattern)item.Pattern),
+                RenamerCore.PatternType.Letter => ShowLetterEditor((LetterPattern)item.Pattern),
+                RenamerCore.PatternType.Time => ShowTimeEditor((TimePattern)item.Pattern),
+                RenamerCore.PatternType.Separator => true,
+                _ => false
+            };
+            if (!ok) return;
+
+            item.Pattern.Encode();
+            item.Refresh();
+            ExpressionTextBox.Text = item.Pattern.Pattern;
+            ExpressionTextBox.Focus();
+            ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+        }
+
+        private TextBlock FieldLabel(string text)
+        {
+            return new TextBlock
+            {
+                Text = text,
+                Margin = new Thickness(0, 10, 0, 2),
+                FontSize = 13,
+                Foreground = (System.Windows.Media.Brush)FindResource("OnSurfaceVariantBrush")
+            };
+        }
+
+        private System.Windows.Controls.TextBox FieldTextBox(string text = "")
+        {
+            return new System.Windows.Controls.TextBox
+            {
+                Style = (Style)FindResource("OutlinedTextBox"),
+                Text = text,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+        }
+
+        private System.Windows.Controls.ComboBox FieldComboBox(string[] items, int selectedIndex = 0)
+        {
+            var cb = new System.Windows.Controls.ComboBox
+            {
+                Margin = new Thickness(0, 0, 0, 4),
+                Height = 36,
+                FontSize = 13,
+                VerticalContentAlignment = System.Windows.VerticalAlignment.Center
+            };
+            foreach (var it in items) cb.Items.Add(it);
+            cb.SelectedIndex = selectedIndex;
+            return cb;
+        }
+
+        private bool ShowEditor(string title, double height,
+            Action<StackPanel> buildContent, Action applyValues)
         {
             var dlg = new Window
             {
-                Title = initName == null ? "添加快捷表达式" : "编辑快捷表达式",
-                Width = 360,
-                Height = 200,
+                Title = title,
+                Width = 420,
+                Height = height,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this,
                 ResizeMode = ResizeMode.NoResize,
@@ -313,62 +423,213 @@ namespace Renamer.Wpf
                 FontFamily = (System.Windows.Media.FontFamily)FindResource("AppFont")
             };
 
-            var nameBox = new System.Windows.Controls.TextBox
+            var panel = new StackPanel { Margin = new Thickness(20) };
+            buildContent(panel);
+
+            var okBtn = new System.Windows.Controls.Button
             {
-                Style = (Style)FindResource("OutlinedTextBox"),
-                Text = initName ?? "",
-                Margin = new Thickness(16, 16, 16, 4)
+                Style = (Style)FindResource("FilledButton"),
+                Content = "确定",
+                Width = 96,
+                Margin = new Thickness(0, 16, 8, 0)
             };
-            var patternBox = new System.Windows.Controls.TextBox
+            var cancelBtn = new System.Windows.Controls.Button
             {
-                Style = (Style)FindResource("OutlinedTextBox"),
-                Text = initPattern ?? "",
-                Margin = new Thickness(16, 4, 16, 8),
-                FontFamily = (System.Windows.Media.FontFamily)FindResource("MonoFont")
+                Style = (Style)FindResource("OutlinedButton"),
+                Content = "取消",
+                Width = 96
             };
             var btnPanel = new StackPanel
             {
                 Orientation = System.Windows.Controls.Orientation.Horizontal,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
-                Margin = new Thickness(16, 0, 16, 16)
-            };
-            var okBtn = new System.Windows.Controls.Button
-            {
-                Style = (Style)FindResource("FilledButton"),
-                Content = "确定",
-                Margin = new Thickness(0, 0, 8, 0)
-            };
-            var cancelBtn = new System.Windows.Controls.Button
-            {
-                Style = (Style)FindResource("OutlinedButton"),
-                Content = "取消"
+                Margin = new Thickness(0, 8, 0, 0)
             };
             btnPanel.Children.Add(okBtn);
             btnPanel.Children.Add(cancelBtn);
-
-            var panel = new StackPanel();
-            panel.Children.Add(new TextBlock { Text = "名称", Margin = new Thickness(16, 16, 16, 2), Foreground = (System.Windows.Media.Brush)FindResource("OnSurfaceVariantBrush") });
-            panel.Children.Add(nameBox);
-            panel.Children.Add(new TextBlock { Text = "表达式", Margin = new Thickness(16, 4, 16, 2), Foreground = (System.Windows.Media.Brush)FindResource("OnSurfaceVariantBrush") });
-            panel.Children.Add(patternBox);
             panel.Children.Add(btnPanel);
             dlg.Content = panel;
 
-            string resultName = initName ?? "";
-            string resultPattern = initPattern ?? "";
             bool confirmed = false;
-
-            okBtn.Click += (s, _) => { resultName = nameBox.Text; resultPattern = patternBox.Text; confirmed = true; dlg.Close(); };
+            okBtn.Click += (s, _) => { confirmed = true; dlg.Close(); };
             cancelBtn.Click += (s, _) => dlg.Close();
-
             dlg.KeyDown += (s, ev) =>
             {
-                if (ev.Key == Key.Enter) { resultName = nameBox.Text; resultPattern = patternBox.Text; confirmed = true; dlg.Close(); }
+                if (ev.Key == Key.Enter) { confirmed = true; dlg.Close(); }
                 if (ev.Key == Key.Escape) dlg.Close();
             };
 
             dlg.ShowDialog();
-            return (resultName, resultPattern, confirmed);
+            if (confirmed) applyValues();
+            return confirmed;
+        }
+
+        private bool ShowNameEditor(NamePattern p)
+        {
+            int caseIdx = p.ToUpper ? 1 : (p.ToLower ? 2 : 0);
+            int opIdx = p.Opt switch
+            {
+                OptEnum.Cut => 1,
+                OptEnum.Insert => 2,
+                OptEnum.Delete => 3,
+                OptEnum.Replace1 => 4,
+                OptEnum.Replace2 => 5,
+                _ => 0
+            };
+            int dirIdx = p.Dir == DirEnum.Right ? 1 : 0;
+
+            var caseBox = FieldComboBox(new[] { "原样", "转大写", "转小写" }, caseIdx);
+            var opBox = FieldComboBox(new[] { "原样", "截取", "插入", "删除", "区间替换", "文字替换" }, opIdx);
+            var dirBox = FieldComboBox(new[] { "左起", "右起" }, dirIdx);
+            var fromBox = FieldTextBox(p.From > 0 ? p.From.ToString() : "");
+            var toBox = FieldTextBox(p.To > 0 ? p.To.ToString() : "");
+            var lenBox = FieldTextBox(p.Length > 0 ? p.Length.ToString() : "");
+            var srcBox = FieldTextBox(p.SrcText ?? "");
+            var dstBox = FieldTextBox(p.DstText ?? "");
+
+            return ShowEditor(p.Title, 720,
+                panel =>
+                {
+                    panel.Children.Add(FieldLabel("大小写（优先级最高，选中后忽略下方操作）"));
+                    panel.Children.Add(caseBox);
+                    panel.Children.Add(FieldLabel("操作"));
+                    panel.Children.Add(opBox);
+                    panel.Children.Add(FieldLabel("方向（位置操作用）"));
+                    panel.Children.Add(dirBox);
+                    panel.Children.Add(FieldLabel("起始位置 From（1 基）"));
+                    panel.Children.Add(fromBox);
+                    panel.Children.Add(FieldLabel("结束位置 To（截取/区间替换，1 基含端点）"));
+                    panel.Children.Add(toBox);
+                    panel.Children.Add(FieldLabel("长度 Length（删除）"));
+                    panel.Children.Add(lenBox);
+                    panel.Children.Add(FieldLabel("源文本 SrcText（文字替换的被替换串）"));
+                    panel.Children.Add(srcBox);
+                    panel.Children.Add(FieldLabel("目标文本 DstText（插入/替换的目标串）"));
+                    panel.Children.Add(dstBox);
+                },
+                () =>
+                {
+                    p.ToUpper = caseBox.SelectedIndex == 1;
+                    p.ToLower = caseBox.SelectedIndex == 2;
+                    p.Opt = opBox.SelectedIndex switch
+                    {
+                        1 => OptEnum.Cut,
+                        2 => OptEnum.Insert,
+                        3 => OptEnum.Delete,
+                        4 => OptEnum.Replace1,
+                        5 => OptEnum.Replace2,
+                        _ => OptEnum.None
+                    };
+                    p.Dir = dirBox.SelectedIndex == 1 ? DirEnum.Right : DirEnum.Left;
+                    p.From = ParseInt(fromBox.Text, 1);
+                    p.To = ParseInt(toBox.Text, 1);
+                    p.Length = ParseInt(lenBox.Text, 1);
+                    p.SrcText = srcBox.Text;
+                    p.DstText = dstBox.Text;
+                });
+        }
+
+        private bool ShowNumberEditor(NumberPattern p)
+        {
+            var lenBox = FieldTextBox(p.Length > 0 ? p.Length.ToString() : "");
+            var startBox = FieldTextBox(p.Start.ToString());
+            var stepBox = FieldTextBox(p.Step.ToString());
+
+            return ShowEditor(p.Title, 400,
+                panel =>
+                {
+                    panel.Children.Add(FieldLabel("位宽（左侧补 0，0 不补齐）"));
+                    panel.Children.Add(lenBox);
+                    panel.Children.Add(FieldLabel("起始值（默认 0，支持负数）"));
+                    panel.Children.Add(startBox);
+                    panel.Children.Add(FieldLabel("步增量（默认 1，支持负数）"));
+                    panel.Children.Add(stepBox);
+                },
+                () =>
+                {
+                    p.Length = ParseInt(lenBox.Text, 0);
+                    p.Start = ParseInt(startBox.Text, 0);
+                    p.Step = ParseInt(stepBox.Text, 1);
+                });
+        }
+
+        private bool ShowLetterEditor(LetterPattern p)
+        {
+            int setIdx = (p.Letters != null && p.Letters.Length > 0) ? 2 : (p.IsUpper ? 1 : 0);
+            var setBox = FieldComboBox(new[] { "小写字母 (a-z)", "大写字母 (A-Z)", "自定义字符集" }, setIdx);
+            var customBox = FieldTextBox(p.Letters != null ? new string(p.Letters) : "");
+            var lenBox = FieldTextBox(p.Length > 0 ? p.Length.ToString() : "");
+            var startBox = FieldTextBox(p.Start.ToString());
+            var stepBox = FieldTextBox(p.Step.ToString());
+
+            return ShowEditor(p.Title, 580,
+                panel =>
+                {
+                    panel.Children.Add(FieldLabel("字符集"));
+                    panel.Children.Add(setBox);
+                    panel.Children.Add(FieldLabel("自定义字符集（选择\"自定义字符集\"时生效）"));
+                    panel.Children.Add(customBox);
+                    panel.Children.Add(FieldLabel("位宽（左侧补首字符，0 不补齐）"));
+                    panel.Children.Add(lenBox);
+                    panel.Children.Add(FieldLabel("起始序数（默认 0）"));
+                    panel.Children.Add(startBox);
+                    panel.Children.Add(FieldLabel("步增量（默认 1，支持负）"));
+                    panel.Children.Add(stepBox);
+                },
+                () =>
+                {
+                    if (setBox.SelectedIndex == 2)
+                    {
+                        var cs = customBox.Text ?? "";
+                        p.Letters = cs.Length > 0 ? cs.ToCharArray() : null;
+                    }
+                    else
+                    {
+                        p.Letters = null;
+                        p.IsUpper = setBox.SelectedIndex == 1;
+                    }
+                    p.Length = ParseInt(lenBox.Text, 0);
+                    p.Start = ParseInt(startBox.Text, 0);
+                    p.Step = ParseInt(stepBox.Text, 1);
+                });
+        }
+
+        private bool ShowTimeEditor(TimePattern p)
+        {
+            int srcIdx = p.Source switch
+            {
+                SourceEnum.CreateTime => 1,
+                SourceEnum.ModifyTime => 2,
+                SourceEnum.AccessTime => 3,
+                _ => 0
+            };
+            var srcBox = FieldComboBox(new[] { "当前时间", "创建时间", "修改时间", "访问时间" }, srcIdx);
+            var fmtBox = FieldTextBox(p.Format ?? "");
+
+            return ShowEditor(p.Title, 380,
+                panel =>
+                {
+                    panel.Children.Add(FieldLabel("时间来源"));
+                    panel.Children.Add(srcBox);
+                    panel.Children.Add(FieldLabel("格式（留空 = yyyyMMddHHmmss）"));
+                    panel.Children.Add(fmtBox);
+                },
+                () =>
+                {
+                    p.Source = srcBox.SelectedIndex switch
+                    {
+                        1 => SourceEnum.CreateTime,
+                        2 => SourceEnum.ModifyTime,
+                        3 => SourceEnum.AccessTime,
+                        _ => SourceEnum.CurrentTime
+                    };
+                    p.Format = string.IsNullOrWhiteSpace(fmtBox.Text) ? null : fmtBox.Text;
+                });
+        }
+
+        private static int ParseInt(string s, int defaultValue)
+        {
+            return int.TryParse(s?.Trim(), out int v) ? v : defaultValue;
         }
 
         protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
@@ -486,19 +747,28 @@ namespace Renamer.Wpf
 
     public class QuickTagItem : INotifyPropertyChanged
     {
-        private string _name = string.Empty;
-        private string _pattern = string.Empty;
+        private RenamerPattern? _pattern;
 
-        public string Name
-        {
-            get => _name;
-            set { _name = value; OnPropertyChanged(nameof(Name)); }
-        }
-
-        public string Pattern
+        public RenamerPattern? Pattern
         {
             get => _pattern;
-            set { _pattern = value; OnPropertyChanged(nameof(Pattern)); }
+            set
+            {
+                _pattern = value;
+                OnPropertyChanged(nameof(Pattern));
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(Expression));
+            }
+        }
+
+        public string Name => _pattern?.Title ?? string.Empty;
+
+        public string Expression => _pattern?.Pattern ?? string.Empty;
+
+        public void Refresh()
+        {
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Expression));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

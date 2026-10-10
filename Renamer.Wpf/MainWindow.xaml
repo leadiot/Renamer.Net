@@ -68,7 +68,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Button Content="{Binding Name}"
-                                Tag="{Binding Pattern}"
+                                Tag="{Binding Expression}"
                                 Style="{StaticResource ChipButton}"
                                 Margin="0,0,8,0"
                                 Click="QuickTagItem_Click"
