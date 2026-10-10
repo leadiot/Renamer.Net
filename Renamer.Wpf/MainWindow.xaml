@@ -45,10 +45,11 @@
         </Border>
 
         <!-- 快捷表达式列表 -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
+        <Grid Grid.Row="1" Margin="0,0,0,12"
+              HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
@@ -67,12 +68,32 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,8,8,0">
+                        <Grid Margin="0,8,8,0"
+                              AllowDrop="True"
+                              DragOver="QuickTagItem_DragOver"
+                              DragLeave="QuickTagItem_DragLeave"
+                              Drop="QuickTagItem_Drop">
                             <Button Content="{Binding Name}"
                                     Style="{StaticResource ChipButton}"
-                                    ToolTip="点击编辑"
+                                    ToolTip="点击编辑，拖动可排序"
                                     Click="QuickTagItem_Click"
-                                    MouseRightButtonUp="QuickTagItem_RightClick"/>
+                                    MouseRightButtonUp="QuickTagItem_RightClick"
+                                    PreviewMouseLeftButtonDown="QuickTagItem_PreviewMouseLeftButtonDown"
+                                    PreviewMouseMove="QuickTagItem_PreviewMouseMove"/>
+                            <Rectangle x:Name="InsertBeforeBar"
+                                       Width="3" RadiusX="1.5" RadiusY="1.5"
+                                       Fill="{StaticResource PrimaryBrush}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Stretch"
+                                       Margin="-5,8,0,0"
+                                       Visibility="Collapsed"/>
+                            <Rectangle x:Name="InsertAfterBar"
+                                       Width="3" RadiusX="1.5" RadiusY="1.5"
+                                       Fill="{StaticResource PrimaryBrush}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Stretch"
+                                       Margin="0,8,-5,0"
+                                       Visibility="Collapsed"/>
                             <Button Content="✕"
                                     Style="{StaticResource ChipCloseButton}"
                                     HorizontalAlignment="Right"

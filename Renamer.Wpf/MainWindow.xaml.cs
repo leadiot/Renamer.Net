@@ -310,8 +310,20 @@ namespace Renamer.Wpf
             ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
         }
 
+        private QuickTagItem? _dragItem;
+        private System.Windows.Point _dragStartPoint;
+        private bool _dragArmed;
+        private bool _suppressNextChipClick;
+        private System.Windows.Controls.Grid? _dropHintGrid;
+
         private void QuickTagItem_Click(object sender, RoutedEventArgs e)
         {
+            // 拖拽结束后系统可能仍补发一次 Click，此时不弹编辑窗口
+            if (_suppressNextChipClick)
+            {
+                _suppressNextChipClick = false;
+                return;
+            }
             if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
             {
                 EditQuickTag(item);
@@ -324,6 +336,144 @@ namespace Renamer.Wpf
             {
                 QuickTags.Remove(item);
             }
+        }
+
+        private void QuickTagItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _suppressNextChipClick = false;
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            {
+                _dragItem = item;
+                _dragStartPoint = e.GetPosition(null);
+                _dragArmed = true;
+            }
+            else
+            {
+                _dragArmed = false;
+            }
+        }
+
+        private void QuickTagItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (!_dragArmed || _dragItem == null || e.LeftButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
+
+            System.Windows.Point pos = e.GetPosition(null);
+            if (Math.Abs(pos.X - _dragStartPoint.X) < SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(pos.Y - _dragStartPoint.Y) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                return;
+            }
+
+            _dragArmed = false;
+            var source = _dragItem;
+            if (sender is System.Windows.Controls.Button btn)
+            {
+                DragDrop.DoDragDrop(btn, source, System.Windows.DragDropEffects.Move);
+            }
+            _suppressNextChipClick = true;
+            _dragItem = null;
+        }
+
+        private void QuickTagItem_DragOver(object sender, System.Windows.DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(QuickTagItem)) || sender is not System.Windows.Controls.Grid grid)
+            {
+                e.Effects = System.Windows.DragDropEffects.None;
+                return;
+            }
+
+            e.Effects = System.Windows.DragDropEffects.Move;
+            bool insertAfter = e.GetPosition(grid).X > grid.ActualWidth / 2.0;
+            ShowDropHint(grid, insertAfter);
+            e.Handled = true;
+        }
+
+        private void QuickTagItem_DragLeave(object sender, System.Windows.DragEventArgs e)
+        {
+            // 鼠标移到子元素也会触发 DragLeave，延后判定是否真正离开当前项
+            if (sender is System.Windows.Controls.Grid grid)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (_dropHintGrid == grid && !grid.IsMouseOver)
+                    {
+                        ClearDropHint();
+                    }
+                }));
+            }
+        }
+
+        private void QuickTagItem_Drop(object sender, System.Windows.DragEventArgs e)
+        {
+            ClearDropHint();
+            if (!e.Data.GetDataPresent(typeof(QuickTagItem))) return;
+            if (e.Data.GetData(typeof(QuickTagItem)) is not QuickTagItem source) return;
+            if (sender is not System.Windows.Controls.Grid grid || grid.DataContext is not QuickTagItem target) return;
+            if (ReferenceEquals(source, target))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            bool insertAfter = e.GetPosition(grid).X > grid.ActualWidth / 2.0;
+            int from = QuickTags.IndexOf(source);
+            if (from < 0) return;
+
+            QuickTags.RemoveAt(from);
+            int targetIndex = QuickTags.IndexOf(target);
+            if (targetIndex < 0) return;
+
+            int insertAt = insertAfter ? targetIndex + 1 : targetIndex;
+            QuickTags.Insert(insertAt, source);
+            e.Handled = true;
+        }
+
+        private void ShowDropHint(System.Windows.Controls.Grid grid, bool insertAfter)
+        {
+            if (_dropHintGrid != grid)
+            {
+                ClearDropHint();
+                _dropHintGrid = grid;
+            }
+            SetDropBar(grid, "InsertBeforeBar", !insertAfter);
+            SetDropBar(grid, "InsertAfterBar", insertAfter);
+        }
+
+        private void ClearDropHint()
+        {
+            if (_dropHintGrid == null) return;
+            SetDropBar(_dropHintGrid, "InsertBeforeBar", false);
+            SetDropBar(_dropHintGrid, "InsertAfterBar", false);
+            _dropHintGrid = null;
+        }
+
+        private static void SetDropBar(System.Windows.Controls.Grid grid, string barName, bool visible)
+        {
+            if (FindChild<System.Windows.Shapes.Rectangle>(grid, barName) is { } bar)
+            {
+                bar.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private static T? FindChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typed && typed.Name == name)
+                {
+                    return typed;
+                }
+                if (FindChild<T>(child, name) is { } result)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
 
         private void QuickTagItem_RightClick(object sender, MouseButtonEventArgs e)
