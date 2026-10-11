@@ -393,6 +393,8 @@ namespace Com.Scm.Renamer
             {
                 QuickTags.Remove(item);
             }
+
+            showPattern();
         }
 
         private void QuickTagItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

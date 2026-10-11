@@ -1,173 +1,18 @@
 <Application x:Class="Com.Scm.Renamer.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Renamer.Wpf"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- ================================================================== -->
-            <!-- HandyControl 3.5 主题（亮色皮肤 + 控件默认样式）                    -->
-            <!-- ================================================================== -->
+            <!-- HandyControl 3.5 默认主题：全部控件（Button/TextBox/ComboBox/DataGrid/Menu 等）
+                 自动套用隐式样式，业务窗口只引用主题画笔，不做外观定制。 -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- 业务窗口直接引用 HandyControl 主题画笔：                              -->
-            <!-- RegionBrush / SecondaryRegionBrush / PrimaryTextBrush /             -->
-            <!-- SecondaryTextBrush / ThirdlyTextBrush / SecondaryBorderBrush /      -->
-            <!-- PrimaryBrush / SuccessBrush / WarningBrush / DangerBrush            -->
-
-            <!-- ================================================================== -->
-            <!-- Typography / Shadow                                               -->
-            <!-- ================================================================== -->
-            <FontFamily x:Key="AppFont">"Segoe UI Variable", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif</FontFamily>
+            <!-- 表达式输入框使用等宽字体，属于功能需要，非外观定制 -->
             <FontFamily x:Key="MonoFont">"Cascadia Code", "Consolas", "Courier New", monospace</FontFamily>
-
-            <DropShadowEffect x:Key="Elevation1"
-                              Color="Black" Opacity="0.12"
-                              BlurRadius="8" ShadowDepth="2" Direction="270"/>
-            <DropShadowEffect x:Key="Elevation2"
-                              Color="Black" Opacity="0.12"
-                              BlurRadius="12" ShadowDepth="4" Direction="270"/>
-            <DropShadowEffect x:Key="Elevation3"
-                              Color="Black" Opacity="0.16"
-                              BlurRadius="16" ShadowDepth="6" Direction="270"/>
-
-            <SolidColorBrush x:Key="HoverOnPrimaryBrush" Color="White" Opacity="0.12"/>
-            <SolidColorBrush x:Key="PressedOnPrimaryBrush" Color="White" Opacity="0.2"/>
-
-            <!-- ================================================================== -->
-            <!-- 按钮：主/次/描边直接继承 HC 风格；芯片与圆形图标按钮保留定制模板      -->
-            <!-- ================================================================== -->
-
-            <!-- Filled Button (primary action) -->
-            <Style x:Key="FilledButton" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
-                <Setter Property="Height" Value="36"/>
-                <Setter Property="FontSize" Value="13"/>
-            </Style>
-
-            <!-- Tonal Button (secondary action) -->
-            <Style x:Key="TonalButton" TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
-                <Setter Property="Height" Value="36"/>
-                <Setter Property="FontSize" Value="13"/>
-            </Style>
-
-            <!-- Outlined Button -->
-            <Style x:Key="OutlinedButton" TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
-                <Setter Property="Height" Value="36"/>
-                <Setter Property="FontSize" Value="13"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBorderBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-            </Style>
-
-            <!-- Chip Button (filter/assist, HC 风格胶囊) -->
-            <Style x:Key="ChipButton" TargetType="Button">
-                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="Padding" Value="14,0"/>
-                <Setter Property="MinWidth" Value="32"/>
-                <Setter Property="Height" Value="30"/>
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Border x:Name="Bd"
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        CornerRadius="15"/>
-                                <Border x:Name="Overlay"
-                                        Background="Transparent"
-                                        CornerRadius="15"/>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Margin="{TemplateBinding Padding}"/>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Overlay" Property="Background"
-                                            Value="{DynamicResource LightPrimaryBrush}"/>
-                                    <Setter TargetName="Bd" Property="BorderBrush"
-                                            Value="{DynamicResource PrimaryBrush}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Overlay" Property="Background"
-                                            Value="{DynamicResource LightPrimaryBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.38"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- Icon Circle Button -->
-            <Style x:Key="IconButton" TargetType="Button">
-                <Setter Property="Foreground" Value="{DynamicResource TextIconBrush}"/>
-                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                <Setter Property="Width" Value="36"/>
-                <Setter Property="Height" Value="36"/>
-                <Setter Property="FontSize" Value="14"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Ellipse x:Name="Bg" Fill="{TemplateBinding Background}"/>
-                                <Ellipse x:Name="Overlay" Fill="Transparent"/>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Overlay" Property="Fill"
-                                            Value="{StaticResource HoverOnPrimaryBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Overlay" Property="Fill"
-                                            Value="{StaticResource PressedOnPrimaryBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.38"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- ================================================================== -->
-            <!-- 输入框 / DataGrid：套用 HC 隐式样式                                  -->
-            <!-- ================================================================== -->
-
-            <!-- Text Input（沿用 HandyControl TextBox 样式；表达式框单独指定等宽字体） -->
-            <Style x:Key="OutlinedTextBox" TargetType="TextBox"
-                   BasedOn="{StaticResource {x:Type TextBox}}"/>
-
-            <!-- DataGrid -->
-            <Style x:Key="MaterialDataGrid" TargetType="DataGrid"
-                   BasedOn="{StaticResource {x:Type DataGrid}}">
-                <Setter Property="CanUserAddRows" Value="False"/>
-                <Setter Property="CanUserDeleteRows" Value="False"/>
-                <Setter Property="CanUserResizeRows" Value="False"/>
-                <Setter Property="AutoGenerateColumns" Value="False"/>
-                <Setter Property="SelectionMode" Value="Extended"/>
-                <Setter Property="HeadersVisibility" Value="Column"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="RowBackground" Value="Transparent"/>
-                <Setter Property="AlternatingRowBackground" Value="Transparent"/>
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

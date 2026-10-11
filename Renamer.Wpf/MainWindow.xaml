@@ -7,7 +7,6 @@
         mc:Ignorable="d"
         Title="批量重命名" Height="680" Width="1120"
         Background="{StaticResource RegionBrush}"
-        FontFamily="{StaticResource AppFont}"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="20,16,20,16">
         <Grid.RowDefinitions>
@@ -33,16 +32,14 @@
                            Foreground="{StaticResource SecondaryTextBrush}"/>
                 <Button x:Name="ExpressionMenuButton"
                         Content="?"
-                        Style="{StaticResource IconButton}"
+                        Style="{StaticResource ButtonIconCircular}"
                         DockPanel.Dock="Right"
                         Margin="12,0,0,0"
-                        Width="40" Height="40"
                         Click="ExpressionMenuButton_Click"/>
                 <TextBox x:Name="ExpressionTextBox"
-                         Style="{StaticResource OutlinedTextBox}"
-                         Height="40"
-                         FontFamily="{StaticResource MonoFont}"
+                         Height="32"
                          VerticalContentAlignment="Center"
+                         FontFamily="{StaticResource MonoFont}"
                          Text="&lt;*&gt;&lt;.&gt;&lt;?&gt;"/>
             </DockPanel>
         </Border>
@@ -57,7 +54,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     Content="+"
-                    Style="{StaticResource ChipButton}"
+                    Style="{StaticResource ButtonPrimary}"
                     Margin="0,0,8,0"
                     Click="QuickTagAddStart_Click"/>
             <ItemsControl Grid.Column="1"
@@ -106,7 +103,7 @@
             </ItemsControl>
             <Button Grid.Column="2"
                     Content="+"
-                    Style="{StaticResource ChipButton}"
+                    Style="{StaticResource ButtonPrimary}"
                     Click="QuickTagAddEnd_Click"/>
         </Grid>
 
@@ -115,67 +112,64 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button x:Name="AddFolderButton"
                         Content="添加目录"
-                        Style="{StaticResource TonalButton}"
+                        Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
                         Click="AddFolderButton_Click"/>
                 <Button x:Name="AddFileButton"
                         Content="添加文件"
-                        Style="{StaticResource TonalButton}"
+                        Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
                         Click="AddFileButton_Click"/>
                 <Button x:Name="RefreshPreviewButton"
                         Content="刷新预览"
-                        Style="{StaticResource OutlinedButton}"
+                        Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
                         Click="RefreshPreviewButton_Click"/>
                 <Button x:Name="ExecuteRenameButton"
                         Content="执行更名"
-                        Style="{StaticResource FilledButton}"
+                        Style="{StaticResource ButtonPrimary}"
                         Click="ExecuteRenameButton_Click"/>
             </StackPanel>
             <Button x:Name="ExportButton"
                     Content="导出"
-                    Style="{StaticResource OutlinedButton}"
+                    Style="{StaticResource ButtonDefault}"
                     HorizontalAlignment="Right"
                     Click="ExportButton_Click"/>
         </Grid>
 
         <!-- 结果表格 -->
-        <Border Grid.Row="3"
-                Background="{StaticResource RegionBrush}"
-                CornerRadius="12"
-                Padding="0"
-                Effect="{StaticResource Elevation1}"
-                ClipToBounds="True">
-            <DataGrid x:Name="ResultDataGrid"
-                      Style="{StaticResource MaterialDataGrid}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="原始名称" Binding="{Binding OriginalName}" Width="2*"/>
-                    <DataGridTextColumn Header="结果名称" Binding="{Binding ResultName}" Width="2*"/>
-                    <DataGridTextColumn Header="异常信息" Binding="{Binding ExceptionMessage}" Width="1.5*"/>
-                    <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                <Setter Property="FontWeight" Value="Medium"/>
-                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
-                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
-                                        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
-                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+        <DataGrid x:Name="ResultDataGrid"
+                  Grid.Row="3"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="原始名称" Binding="{Binding OriginalName}" Width="2*"/>
+                <DataGridTextColumn Header="结果名称" Binding="{Binding ResultName}" Width="2*"/>
+                <DataGridTextColumn Header="异常信息" Binding="{Binding ExceptionMessage}" Width="1.5*"/>
+                <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
+                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
+                                    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
+                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <!-- 状态栏 -->
         <Grid Grid.Row="4" Margin="0,12,0,0">

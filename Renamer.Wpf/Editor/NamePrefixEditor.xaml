@@ -6,7 +6,6 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource RegionBrush}"
-        FontFamily="{StaticResource AppFont}"
         KeyDown="Window_KeyDown">
     <StackPanel Margin="20">
         <editor:NameEditor x:Name="Fields"/>
@@ -15,12 +14,12 @@
                     HorizontalAlignment="Right"
                     Margin="0,8,0,0">
             <Button Content="确定"
-                    Style="{StaticResource FilledButton}"
+                    Style="{StaticResource ButtonPrimary}"
                     Width="96"
                     Margin="0,16,8,0"
                     Click="OkButton_Click"/>
             <Button Content="取消"
-                    Style="{StaticResource OutlinedButton}"
+                    Style="{StaticResource ButtonDefault}"
                     Width="96"
                     Click="CancelButton_Click"/>
         </StackPanel>

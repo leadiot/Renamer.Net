@@ -5,7 +5,6 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource RegionBrush}"
-        FontFamily="{StaticResource AppFont}"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
@@ -17,20 +16,18 @@
 
     <StackPanel Margin="20">
         <TextBlock Text="固定文本" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="ContentBox"
-                 Style="{StaticResource OutlinedTextBox}"
-                 Margin="0,0,0,4"/>
+        <TextBox x:Name="ContentBox" Margin="0,0,0,4"/>
 
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,8,0,0">
             <Button Content="确定"
-                    Style="{StaticResource FilledButton}"
+                    Style="{StaticResource ButtonPrimary}"
                     Width="96"
                     Margin="0,16,8,0"
                     Click="OkButton_Click"/>
             <Button Content="取消"
-                    Style="{StaticResource OutlinedButton}"
+                    Style="{StaticResource ButtonDefault}"
                     Width="96"
                     Click="CancelButton_Click"/>
         </StackPanel>
