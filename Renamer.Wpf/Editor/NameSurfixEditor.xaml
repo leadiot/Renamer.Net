@@ -5,7 +5,7 @@
         Width="420" Height="720"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource SurfaceBrush}"
+        Background="{StaticResource RegionBrush}"
         FontFamily="{StaticResource AppFont}"
         KeyDown="Window_KeyDown">
     <StackPanel Margin="20">

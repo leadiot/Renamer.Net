@@ -367,23 +367,29 @@ namespace Com.Scm.Renamer
         private bool _suppressNextChipClick;
         private System.Windows.Controls.Grid _dropHintGrid;
 
-        private void QuickTagItem_Click(object sender, RoutedEventArgs e)
+        private void QuickTagItem_Edit(object sender, MouseButtonEventArgs e)
         {
-            // 拖拽结束后系统可能仍补发一次 Click，此时不弹编辑窗口
+            // 拖拽结束后系统可能仍补发一次点击，此时不弹编辑窗口
             if (_suppressNextChipClick)
             {
                 _suppressNextChipClick = false;
                 return;
             }
-            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            // 点击 hc:Tag 自带的关闭按钮时只执行删除，不弹编辑窗口
+            if (e.OriginalSource is DependencyObject src &&
+                FindAncestor<System.Windows.Controls.Primitives.ButtonBase>(src) != null)
+            {
+                return;
+            }
+            if (sender is FrameworkElement fe && fe.DataContext is QuickTagItem item)
             {
                 EditQuickTag(item);
             }
         }
 
-        private void QuickTagDelete_Click(object sender, RoutedEventArgs e)
+        private void QuickTagItem_Delete(object sender, EventArgs e)
         {
-            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            if (sender is FrameworkElement fe && fe.DataContext is QuickTagItem item)
             {
                 QuickTags.Remove(item);
             }
@@ -392,7 +398,7 @@ namespace Com.Scm.Renamer
         private void QuickTagItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _suppressNextChipClick = false;
-            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item)
+            if (sender is FrameworkElement fe && fe.DataContext is QuickTagItem item)
             {
                 _dragItem = item;
                 _dragStartPoint = e.GetPosition(null);
@@ -404,7 +410,7 @@ namespace Com.Scm.Renamer
             }
         }
 
-        private void QuickTagItem_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void QuickTagItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (!_dragArmed || _dragItem == null || e.LeftButton != MouseButtonState.Pressed)
             {
@@ -420,9 +426,9 @@ namespace Com.Scm.Renamer
 
             _dragArmed = false;
             var source = _dragItem;
-            if (sender is System.Windows.Controls.Button btn)
+            if (sender is FrameworkElement fe)
             {
-                DragDrop.DoDragDrop(btn, source, System.Windows.DragDropEffects.Move);
+                DragDrop.DoDragDrop(fe, source, System.Windows.DragDropEffects.Move);
             }
             _suppressNextChipClick = true;
             _dragItem = null;
@@ -527,9 +533,23 @@ namespace Com.Scm.Renamer
             return null;
         }
 
+        private static T FindAncestor<T>(DependencyObject start) where T : DependencyObject
+        {
+            var current = start;
+            while (current != null)
+            {
+                if (current is T match)
+                {
+                    return match;
+                }
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
         private void QuickTagItem_RightClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is System.Windows.Controls.Button btn && btn.DataContext is QuickTagItem item && item.Pattern != null)
+            if (sender is FrameworkElement btn && btn.DataContext is QuickTagItem item && item.Pattern != null)
             {
                 var menu = new System.Windows.Controls.ContextMenu();
 

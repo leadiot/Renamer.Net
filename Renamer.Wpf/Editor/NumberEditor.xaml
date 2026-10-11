@@ -4,14 +4,14 @@
         Width="420" Height="400"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource SurfaceBrush}"
+        Background="{StaticResource RegionBrush}"
         FontFamily="{StaticResource AppFont}"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,10,0,2"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="{StaticResource OnSurfaceVariantBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
         </Style>
     </Window.Resources>
 

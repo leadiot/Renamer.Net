@@ -6,7 +6,7 @@
         <Style x:Key="EditorLabel" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,10,0,2"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="{StaticResource OnSurfaceVariantBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
         </Style>
         <Style x:Key="EditorCombo" TargetType="ComboBox">
             <Setter Property="Margin" Value="0,0,0,4"/>
