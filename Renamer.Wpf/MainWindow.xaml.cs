@@ -7,7 +7,6 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using RenamerCore = Com.Scm.Renamer;
 
 namespace Com.Scm.Renamer
 {
@@ -73,7 +72,6 @@ namespace Com.Scm.Renamer
                     {
                         Header = $"{t.Name}    {t.Pattern}",
                         Tag = t.Pattern,
-                        FontFamily = (System.Windows.Media.FontFamily)FindResource("MonoFont")
                     };
                     item.Click += TemplateMenuItem_Click;
                     menu.Items.Add(item);
@@ -107,9 +105,18 @@ namespace Com.Scm.Renamer
         {
             if (sender is System.Windows.Controls.MenuItem mi && mi.Tag is string pattern)
             {
-                ExpressionTextBox.Text = pattern;
-                ExpressionTextBox.Focus();
-                ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+                if (string.IsNullOrWhiteSpace(pattern))
+                {
+                    return;
+                }
+
+                var patterns = TemplateParser.Parse(pattern);
+                QuickTags.Clear();
+                foreach (var tmp in patterns)
+                {
+                    QuickTags.Add(new QuickTagItem { Pattern = tmp });
+                }
+                showPattern();
             }
         }
 
@@ -172,11 +179,11 @@ namespace Com.Scm.Renamer
             FileItems.Add(new FileItemDvo
             {
                 Path = path,
-                OriginalName = System.IO.Path.GetFileName(path)
+                SrcName = System.IO.Path.GetFileName(path)
             });
         }
 
-        private void RefreshPreviewButton_Click(object sender, RoutedEventArgs e)
+        private void BtPreview_Click(object sender, RoutedEventArgs e)
         {
             RunPreview();
         }
@@ -189,19 +196,19 @@ namespace Com.Scm.Renamer
                 return;
             }
 
-            var coreItems = FileItems.Select(x => x.ToCoreItem()).ToList();
-            RenamerCore.Renamer renamer;
+            var coreItems = FileItems.Select(x => x.ToItem()).ToList();
+            Renamer renamer;
             try
             {
-                renamer = RenamerCore.Renamer.Compile(ExpressionTextBox.Text);
+                renamer = Renamer.Compile(ExpressionTextBox.Text);
             }
-            catch (RenamerCore.TemplateParseException ex)
+            catch (TemplateParseException ex)
             {
                 System.Windows.MessageBox.Show($"表达式解析失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            RenamerCore.RenamePlan plan = renamer.Commit(coreItems, RenamerCore.ConflictMode.AutoSuffix);
+            RenamePlan plan = renamer.Commit(coreItems, ConflictMode.AutoSuffix);
             for (int i = 0; i < coreItems.Count; i++)
             {
                 FileItems[i].ApplyCoreItem(coreItems[i]);
@@ -237,7 +244,7 @@ namespace Com.Scm.Renamer
                 sb.AppendLine("原始名称,结果名称,执行结果,异常信息");
                 foreach (FileItemDvo item in FileItems)
                 {
-                    sb.AppendLine($"{EscapeCsv(item.OriginalName)},{EscapeCsv(item.ResultName ?? string.Empty)},{EscapeCsv(item.ResultStatus ?? string.Empty)},{EscapeCsv(item.ExceptionMessage ?? string.Empty)}");
+                    sb.AppendLine($"{EscapeCsv(item.SrcName)},{EscapeCsv(item.DstName ?? string.Empty)},{EscapeCsv(item.ResultStatus ?? string.Empty)},{EscapeCsv(item.IssueMessage ?? string.Empty)}");
                 }
 
                 File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
@@ -275,13 +282,13 @@ namespace Com.Scm.Renamer
         private void QuickTagAddStart_Click(object sender, RoutedEventArgs e)
         {
             var menu = new System.Windows.Controls.ContextMenu();
-            AddTypeMenu(menu, "文件前缀", RenamerCore.PatternType.Prefix, true);
-            AddTypeMenu(menu, "文件后缀", RenamerCore.PatternType.Suffix, true);
-            AddTypeMenu(menu, "固定文本", RenamerCore.PatternType.Text, true);
-            AddTypeMenu(menu, "数字序列", RenamerCore.PatternType.Number, true);
-            AddTypeMenu(menu, "字符序列", RenamerCore.PatternType.Letter, true);
-            AddTypeMenu(menu, "时间信息", RenamerCore.PatternType.Time, true);
-            AddTypeMenu(menu, "条件分隔符", RenamerCore.PatternType.Separator, true);
+            AddTypeMenu(menu, "文件前缀", PatternType.Prefix, true);
+            AddTypeMenu(menu, "文件后缀", PatternType.Suffix, true);
+            AddTypeMenu(menu, "固定文本", PatternType.Text, true);
+            AddTypeMenu(menu, "数字序列", PatternType.Number, true);
+            AddTypeMenu(menu, "字符序列", PatternType.Letter, true);
+            AddTypeMenu(menu, "时间信息", PatternType.Time, true);
+            AddTypeMenu(menu, "条件分隔符", PatternType.Separator, true);
             menu.PlacementTarget = (UIElement)sender;
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;
@@ -290,56 +297,56 @@ namespace Com.Scm.Renamer
         private void QuickTagAddEnd_Click(object sender, RoutedEventArgs e)
         {
             var menu = new System.Windows.Controls.ContextMenu();
-            AddTypeMenu(menu, "文件前缀", RenamerCore.PatternType.Prefix, false);
-            AddTypeMenu(menu, "文件后缀", RenamerCore.PatternType.Suffix, false);
-            AddTypeMenu(menu, "固定文本", RenamerCore.PatternType.Text, false);
-            AddTypeMenu(menu, "数字序列", RenamerCore.PatternType.Number, false);
-            AddTypeMenu(menu, "字符序列", RenamerCore.PatternType.Letter, false);
-            AddTypeMenu(menu, "时间信息", RenamerCore.PatternType.Time, false);
-            AddTypeMenu(menu, "条件分隔符", RenamerCore.PatternType.Separator, false);
+            AddTypeMenu(menu, "文件前缀", PatternType.Prefix, false);
+            AddTypeMenu(menu, "文件后缀", PatternType.Suffix, false);
+            AddTypeMenu(menu, "固定文本", PatternType.Text, false);
+            AddTypeMenu(menu, "数字序列", PatternType.Number, false);
+            AddTypeMenu(menu, "字符序列", PatternType.Letter, false);
+            AddTypeMenu(menu, "时间信息", PatternType.Time, false);
+            AddTypeMenu(menu, "条件分隔符", PatternType.Separator, false);
             menu.PlacementTarget = (UIElement)sender;
             menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             menu.IsOpen = true;
         }
 
-        private void AddTypeMenu(System.Windows.Controls.ContextMenu menu, string header, RenamerCore.PatternType type, bool start)
+        private void AddTypeMenu(System.Windows.Controls.ContextMenu menu, string header, PatternType type, bool start)
         {
             var item = new System.Windows.Controls.MenuItem { Header = header, Tag = type };
             item.Click += (s, _) => OnPatternTypeChosen(type, start);
             menu.Items.Add(item);
         }
 
-        private void OnPatternTypeChosen(RenamerCore.PatternType type, bool start)
+        private void OnPatternTypeChosen(PatternType type, bool start)
         {
             RenamerPattern pattern;
             bool ok;
             switch (type)
             {
-                case RenamerCore.PatternType.Prefix:
+                case PatternType.Prefix:
                     pattern = new NamePrefixPattern();
                     ok = new Editor.NamePrefixEditor((NamePrefixPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Suffix:
+                case PatternType.Suffix:
                     pattern = new NameSuffixPattern();
                     ok = new Editor.NameSurfixEditor((NameSuffixPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Text:
+                case PatternType.Text:
                     pattern = new TextPattern();
                     ok = new Editor.TextEditor((TextPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Number:
+                case PatternType.Number:
                     pattern = new NumberPattern();
                     ok = new Editor.NumberEditor((NumberPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Letter:
+                case PatternType.Letter:
                     pattern = new LetterPattern();
                     ok = new Editor.LetterEditor((LetterPattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Time:
+                case PatternType.Time:
                     pattern = new TimePattern();
                     ok = new Editor.TimeEditor((TimePattern)pattern) { Owner = this }.ShowDialog() == true;
                     break;
-                case RenamerCore.PatternType.Separator:
+                case PatternType.Separator:
                     pattern = new SeparatorPattern();
                     ok = true;
                     break;
@@ -576,13 +583,13 @@ namespace Com.Scm.Renamer
             if (item.Pattern == null) return;
             bool ok = item.Pattern.Type switch
             {
-                RenamerCore.PatternType.Prefix => new Editor.NamePrefixEditor((NamePrefixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Suffix => new Editor.NameSurfixEditor((NameSuffixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Text => new Editor.TextEditor((TextPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Number => new Editor.NumberEditor((NumberPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Letter => new Editor.LetterEditor((LetterPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Time => new Editor.TimeEditor((TimePattern)item.Pattern) { Owner = this }.ShowDialog() == true,
-                RenamerCore.PatternType.Separator => true,
+                PatternType.Prefix => new Editor.NamePrefixEditor((NamePrefixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Suffix => new Editor.NameSurfixEditor((NameSuffixPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Text => new Editor.TextEditor((TextPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Number => new Editor.NumberEditor((NumberPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Letter => new Editor.LetterEditor((LetterPattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Time => new Editor.TimeEditor((TimePattern)item.Pattern) { Owner = this }.ShowDialog() == true,
+                PatternType.Separator => true,
                 _ => false
             };
             if (!ok) return;
@@ -608,23 +615,19 @@ namespace Com.Scm.Renamer
                 return;
             }
 
-            var coreItems = FileItems.Select(x => x.ToCoreItem()).ToList();
-            RenamerCore.Renamer renamer;
+            var coreItems = FileItems.Select(x => x.ToItem()).ToList();
+            Renamer renamer;
             try
             {
-                renamer = RenamerCore.Renamer.Compile(ExpressionTextBox.Text);
+                renamer = Renamer.Compile(ExpressionTextBox.Text);
             }
-            catch (RenamerCore.TemplateParseException ex)
+            catch (TemplateParseException ex)
             {
                 System.Windows.MessageBox.Show($"表达式解析失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            renamer.Preview(coreItems, RenamerCore.ConflictMode.AutoSuffix);
-            for (int i = 0; i < coreItems.Count; i++)
-            {
-                FileItems[i].ApplyCoreItem(coreItems[i]);
-            }
+            renamer.Preview(coreItems, ConflictMode.AutoSuffix);
         }
     }
 }

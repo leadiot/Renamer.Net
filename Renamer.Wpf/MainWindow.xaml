@@ -124,7 +124,7 @@
                         Content="刷新预览"
                         Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
-                        Click="RefreshPreviewButton_Click"/>
+                        Click="BtPreview_Click"/>
                 <Button x:Name="ExecuteRenameButton"
                         Content="执行更名"
                         Style="{StaticResource ButtonPrimary}"
@@ -145,9 +145,9 @@
                   CanUserDeleteRows="False"
                   CanUserResizeRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="原始名称" Binding="{Binding OriginalName}" Width="2*"/>
-                <DataGridTextColumn Header="结果名称" Binding="{Binding ResultName}" Width="2*"/>
-                <DataGridTextColumn Header="异常信息" Binding="{Binding ExceptionMessage}" Width="1.5*"/>
+                <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
+                <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
+                <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
                 <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">

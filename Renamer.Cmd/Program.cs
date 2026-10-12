@@ -86,11 +86,18 @@ namespace Com.Scm.Renamer
             }
 
             // 4) 收集目录下的直接文件
-            List<FileItem> files = Directory
+            var files = Directory
                 .EnumerateFiles(dir)
                 .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
-                .Select(p => new FileItem { Path = p, SrcName = Path.GetFileName(p) })
                 .ToList();
+            List<FileItem> fileItems = new List<FileItem>();
+            foreach (var file in files)
+            {
+                fileItems.Add(new FileItemDvo()
+                {
+                    Path = file
+                });
+            }
 
             if (files.Count == 0)
             {
@@ -99,7 +106,7 @@ namespace Com.Scm.Renamer
             }
 
             // 5) 预览（只读，不触碰磁盘）
-            RenamePlan plan = renamer.Preview(files, mode);
+            RenamePlan plan = renamer.Preview(fileItems, mode);
             PrintPreview(plan);
 
             if (!plan.CanCommit)
@@ -127,7 +134,7 @@ namespace Com.Scm.Renamer
                 return 0;
             }
 
-            RenamePlan result = renamer.Commit(files, mode);
+            RenamePlan result = renamer.Commit(fileItems, mode);
             PrintCommitResult(result);
             return result.Issues.Count == 0 ? 0 : 3;
         }
