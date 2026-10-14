@@ -5,6 +5,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource AppCanvasBrush}"
+        ShowInTaskbar="False"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
@@ -15,11 +16,11 @@
     </Window.Resources>
 
     <StackPanel Margin="20">
-        <TextBlock Text="位宽（左侧补 0，0 不补齐）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Text="位宽（默认 0，不补齐；非零时，如不足则左侧补0）" Style="{StaticResource EditorLabel}"/>
         <TextBox x:Name="LenBox" Margin="0,0,0,4"/>
-        <TextBlock Text="起始值（默认 0，支持负数）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Text="起始值（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
         <TextBox x:Name="StartBox" Margin="0,0,0,4"/>
-        <TextBlock Text="步增量（默认 1，支持负数）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Text="步增量（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
         <TextBox x:Name="StepBox" Margin="0,0,0,4"/>
 
         <StackPanel Orientation="Horizontal"

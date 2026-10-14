@@ -7,12 +7,6 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
         </Style>
-        <Style x:Key="EditorCombo" TargetType="ComboBox">
-            <Setter Property="Margin" Value="0,0,0,4"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
         <Style x:Key="EditorInput" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
@@ -20,7 +14,7 @@
 
     <StackPanel>
         <TextBlock Text="操作" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="OpBox" Style="{StaticResource EditorCombo}" SelectionChanged="OpBox_SelectionChanged">
+        <ComboBox x:Name="OpBox" SelectionChanged="OpBox_SelectionChanged">
             <ComboBoxItem Content="不变"/>
             <ComboBoxItem Content="转大写"/>
             <ComboBoxItem Content="转小写"/>
@@ -31,7 +25,7 @@
             <ComboBoxItem Content="文字替换"/>
         </ComboBox>
         <TextBlock Text="方向（位置操作用）" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="DirBox" Style="{StaticResource EditorCombo}">
+        <ComboBox x:Name="DirBox">
             <ComboBoxItem Content="左起"/>
             <ComboBoxItem Content="右起"/>
         </ComboBox>

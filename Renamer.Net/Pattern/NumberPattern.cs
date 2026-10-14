@@ -7,7 +7,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// 数字序列。
     /// 语法：|*[length][:start[:step]]
     /// length 为最小位宽，不足左侧补 0；超出位宽时原样输出（不截断）。
-    /// start 默认 0，step 默认 1，均支持负数；序列值 = start + step * 文件序号。
+    /// start 默认 1，step 默认 1，均仅支持自然数（≥ 1）；序列值 = start + step * 文件序号。
     /// </summary>
     public class NumberPattern : RenamerPattern
     {
@@ -15,6 +15,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         {
             Type = PatternType.Number;
             Title = "数字序列";
+            Start = 1;
             Step = 1;
         }
 
@@ -24,12 +25,12 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
         public int Length { get; set; }
 
         /// <summary>
-        /// 起始值
+        /// 起始值（自然数，≥ 1）
         /// </summary>
         public int Start { get; set; }
 
         /// <summary>
-        /// 步增量（可为负）
+        /// 步增量（自然数，≥ 1）
         /// </summary>
         public int Step { get; set; } = 1;
 
@@ -49,16 +50,26 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
                 Length = (int)TemplateParser.ReadDigits(body, ref i, bodyPos, "位宽");
             }
 
-            Start = 0;
+            Start = 1;
             Step = 1;
             if (i < body.Length)
             {
                 TemplateParser.ExpectChar(body, ref i, PATTERN_SPLIT, bodyPos);
-                Start = (int)TemplateParser.ReadSignedInt(body, ref i, bodyPos, "起始值");
+                int startPos = i;
+                Start = (int)TemplateParser.ReadDigits(body, ref i, bodyPos, "起始值");
+                if (Start < 1)
+                {
+                    throw new TemplateParseException("起始值必须是自然数（≥ 1）", bodyPos + startPos);
+                }
                 if (i < body.Length)
                 {
                     TemplateParser.ExpectChar(body, ref i, PATTERN_SPLIT, bodyPos);
-                    Step = (int)TemplateParser.ReadSignedInt(body, ref i, bodyPos, "步增量");
+                    int stepPos = i;
+                    Step = (int)TemplateParser.ReadDigits(body, ref i, bodyPos, "步增量");
+                    if (Step < 1)
+                    {
+                        throw new TemplateParseException("步增量必须是自然数（≥ 1）", bodyPos + stepPos);
+                    }
                 }
             }
             TemplateParser.RequireEnd(body, i, bodyPos);
@@ -72,7 +83,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
             {
                 pattern += Length.ToString(CultureInfo.InvariantCulture);
             }
-            if (Start != 0)
+            if (Start != 1)
             {
                 pattern += PATTERN_SPLIT + Start.ToString(CultureInfo.InvariantCulture);
             }
@@ -86,20 +97,15 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
 
         public override bool GenName(FileItem item)
         {
+            // start、step 均为自然数，序列值恒为正
             long value = Start + (long)Step * item.Index;
-
-            bool negative = value < 0;
-            string digits = (negative ? -value : value).ToString(CultureInfo.InvariantCulture);
-            if (Length > 0)
+            string digits = value.ToString(CultureInfo.InvariantCulture);
+            if (Length > 0 && digits.Length < Length)
             {
-                int width = negative && Length > 1 ? Length - 1 : Length;
-                if (digits.Length < width)
-                {
-                    digits = digits.PadLeft(width, '0');
-                }
+                digits = digits.PadLeft(Length, '0');
             }
 
-            item.DstName += negative ? "-" + digits : digits;
+            item.DstName += digits;
             return true;
         }
     }

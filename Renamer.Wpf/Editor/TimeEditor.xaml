@@ -5,6 +5,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource AppCanvasBrush}"
+        ShowInTaskbar="False"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
@@ -12,17 +13,11 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
         </Style>
-        <Style x:Key="EditorCombo" TargetType="ComboBox">
-            <Setter Property="Margin" Value="0,0,0,4"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
     </Window.Resources>
 
     <StackPanel Margin="20">
         <TextBlock Text="时间来源" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="SrcBox" Style="{StaticResource EditorCombo}">
+        <ComboBox x:Name="SrcBox">
             <ComboBoxItem Content="当前时间"/>
             <ComboBoxItem Content="创建时间"/>
             <ComboBoxItem Content="修改时间"/>

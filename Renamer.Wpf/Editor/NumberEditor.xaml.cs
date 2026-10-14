@@ -32,9 +32,9 @@ namespace Com.Scm.Renamer.Editor
         /// <summary>确认后将输入控件值回写到模型。</summary>
         private void ApplyFields()
         {
-            _pattern.Length = ParseInt(LenBox.Text, 0);
-            _pattern.Start = ParseInt(StartBox.Text, 0);
-            _pattern.Step = ParseInt(StepBox.Text, 1);
+            _pattern.Length = ParseLength(LenBox.Text, 0);
+            _pattern.Start = ParseNatural(StartBox.Text, 1);
+            _pattern.Step = ParseNatural(StepBox.Text, 1);
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -63,9 +63,15 @@ namespace Com.Scm.Renamer.Editor
             }
         }
 
-        private static int ParseInt(string s, int defaultValue)
+        private static int ParseLength(string s, int defaultValue)
         {
-            return int.TryParse(s?.Trim(), out int v) ? v : defaultValue;
+            return int.TryParse(s?.Trim(), out int v) && v >= 0 ? v : defaultValue;
+        }
+
+        /// <summary>解析自然数（≥ 1），解析失败或小于 1 时返回 defaultValue。</summary>
+        private static int ParseNatural(string s, int defaultValue)
+        {
+            return int.TryParse(s?.Trim(), out int v) && v >= 1 ? v : defaultValue;
         }
     }
 }

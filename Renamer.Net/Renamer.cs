@@ -250,13 +250,19 @@ namespace Com.Scm.Renamer
             return string.IsNullOrEmpty(dir) ? null : dir;
         }
 
+        /// <summary>
+        /// 大小写完全匹配
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="candidate"></param>
+        /// <returns></returns>
         private static bool IsSameAsSource(FileItem item, string candidate)
         {
             if (!string.IsNullOrEmpty(item.Path))
             {
-                return string.Equals(Path.GetFileName(item.Path), candidate, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(Path.GetFileName(item.Path), candidate, StringComparison.Ordinal);
             }
-            return string.Equals(item.SrcName, candidate, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(item.SrcName, candidate, StringComparison.Ordinal);
         }
 
         private static Dictionary<string, FileItem> GetDirMap(

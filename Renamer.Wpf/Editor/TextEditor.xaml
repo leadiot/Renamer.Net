@@ -5,6 +5,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource AppCanvasBrush}"
+        ShowInTaskbar="False"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
