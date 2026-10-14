@@ -4,7 +4,7 @@
         Width="420" Height="220"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource RegionBrush}"
+        Background="{StaticResource AppCanvasBrush}"
         KeyDown="Window_KeyDown">
     <Window.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">

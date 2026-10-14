@@ -5,7 +5,7 @@
         Width="420" Height="540"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource RegionBrush}"
+        Background="{StaticResource AppCanvasBrush}"
         KeyDown="Window_KeyDown">
     <StackPanel Margin="20">
         <editor:NameEditor x:Name="Fields"/>

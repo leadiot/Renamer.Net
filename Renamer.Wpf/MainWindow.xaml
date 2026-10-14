@@ -4,12 +4,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:local="clr-namespace:Com.Scm.Renamer"
         mc:Ignorable="d"
-        Title="批量重命名" Height="600" Width="900"
-        Background="{StaticResource RegionBrush}"
+        Title="批量重命名" Height="640" Width="920"
+        Background="{StaticResource AppCanvasBrush}"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="20,16,20,16">
+    <Window.Resources>
+        <local:WidthOffsetConverter x:Key="WidthOffsetConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="22,20,22,16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -17,35 +23,61 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 表达式输入栏 -->
-        <Border Grid.Row="0"
-                Background="{StaticResource SecondaryRegionBrush}"
-                CornerRadius="12"
-                Padding="20,14"
-                Margin="0,0,0,12">
-            <DockPanel LastChildFill="True" VerticalAlignment="Center">
-                <TextBlock Text="表达式"
-                           VerticalAlignment="Center"
-                           Margin="0,0,16,0"
-                           FontSize="14"
-                           FontWeight="Medium"
-                           Foreground="{StaticResource SecondaryTextBrush}"/>
-                <Button x:Name="ExpressionMenuButton"
-                        Content="?"
-                        Style="{StaticResource ButtonIconCircular}"
-                        DockPanel.Dock="Right"
-                        Margin="12,0,0,0"
-                        Click="ExpressionMenuButton_Click"/>
-                <TextBox x:Name="ExpressionTextBox"
-                         Height="32"
-                         VerticalContentAlignment="Center"
-                         FontFamily="{StaticResource MonoFont}"
-                         Text="&lt;*&gt;&lt;.&gt;&lt;?&gt;"/>
+        <!-- 标题区 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,16">
+            <Border Width="12" Height="12" CornerRadius="6"
+                    Background="{StaticResource PrimaryBrush}"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,2"/>
+            <StackPanel>
+                <TextBlock Text="批量重命名"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource PrimaryTextBrush}"/>
+                <TextBlock Text="用表达式批量、可预览地重命名文件"
+                           FontSize="12"
+                           Margin="0,3,0,0"
+                           Foreground="{StaticResource ThirdlyTextBrush}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- 表达式卡片 -->
+        <Border Grid.Row="1"
+                Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="18,16"
+                Margin="0,0,0,14">
+            <DockPanel LastChildFill="True">
+                <TextBlock
+                    Text="表达式"
+                    FontSize="13"
+                    DockPanel.Dock="Left"
+                    FontWeight="SemiBold"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource SecondaryTextBrush}"
+                    Margin="0,0,8,0"/>
+                <Button
+                    x:Name="ExpressionMenuButton"
+                    Content="?"
+                    Style="{StaticResource ButtonIconCircular}"
+                    hc:IconElement.Geometry="{StaticResource AddGeometry}"
+                    DockPanel.Dock="Right"
+                    Margin="12,0,0,0"
+                    Click="ExpressionMenuButton_Click"/>
+                <TextBox
+                    x:Name="ExpressionTextBox"
+                    Height="38"
+                    FontSize="14"
+                    VerticalContentAlignment="Center"
+                    FontFamily="{StaticResource MonoFont}"
+                    Text="&lt;*&gt;&lt;.&gt;&lt;?&gt;"/>
             </DockPanel>
         </Border>
 
         <!-- 快捷表达式列表 -->
-        <Grid Grid.Row="1" Margin="0,0,0,12"
+        <Grid Grid.Row="2" Margin="0,0,0,14"
               HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -58,50 +90,55 @@
                     Margin="0,0,8,0"
                     Style="{StaticResource ButtonPrimary}"
                     Click="QuickTagAddStart_Click"/>
-            <ItemsControl Grid.Column="1"
-                          x:Name="QuickTagList"
+            <ScrollViewer Grid.Column="1"
                           VerticalAlignment="Center"
-                          HorizontalContentAlignment="Center">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="4,0"
-                              AllowDrop="True"
-                              DragOver="QuickTagItem_DragOver"
-                              DragLeave="QuickTagItem_DragLeave"
-                              Drop="QuickTagItem_Drop">
-                            <hc:Tag Content="{Binding Name}"
-                                    ShowCloseButton="True"
-                                    Selectable="False"
-                                    VerticalAlignment="Center"
-                                    ToolTip="点击编辑，拖动可排序"
-                                    PreviewMouseLeftButtonUp="QuickTagItem_Edit"
-                                    MouseRightButtonUp="QuickTagItem_RightClick"
-                                    PreviewMouseLeftButtonDown="QuickTagItem_PreviewMouseLeftButtonDown"
-                                    PreviewMouseMove="QuickTagItem_PreviewMouseMove"
-                                    Closed="QuickTagItem_Delete"/>
-                            <Rectangle x:Name="InsertBeforeBar"
-                                       Width="3" RadiusX="1.5" RadiusY="1.5"
-                                       Fill="{StaticResource PrimaryBrush}"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Stretch"
-                                       Margin="-5,6,0,0"
-                                       Visibility="Collapsed"/>
-                            <Rectangle x:Name="InsertAfterBar"
-                                       Width="3" RadiusX="1.5" RadiusY="1.5"
-                                       Fill="{StaticResource PrimaryBrush}"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Stretch"
-                                       Margin="0,6,-5,0"
-                                       Visibility="Collapsed"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource WidthOffsetConverter}, ConverterParameter=170}">
+                <ItemsControl x:Name="QuickTagList"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="4,0"
+                                  AllowDrop="True"
+                                  DragOver="QuickTagItem_DragOver"
+                                  DragLeave="QuickTagItem_DragLeave"
+                                  Drop="QuickTagItem_Drop">
+                                <hc:Tag Content="{Binding Name}"
+                                        ShowCloseButton="True"
+                                        Selectable="False"
+                                        VerticalAlignment="Center"
+                                        ToolTip="点击编辑，拖动可排序"
+                                        PreviewMouseLeftButtonUp="QuickTagItem_Edit"
+                                        MouseRightButtonUp="QuickTagItem_RightClick"
+                                        PreviewMouseLeftButtonDown="QuickTagItem_PreviewMouseLeftButtonDown"
+                                        PreviewMouseMove="QuickTagItem_PreviewMouseMove"
+                                        Closed="QuickTagItem_Delete"/>
+                                <Rectangle x:Name="InsertBeforeBar"
+                                           Width="3" RadiusX="1.5" RadiusY="1.5"
+                                           Fill="{StaticResource PrimaryBrush}"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Stretch"
+                                           Margin="-5,6,0,0"
+                                           Visibility="Collapsed"/>
+                                <Rectangle x:Name="InsertAfterBar"
+                                           Width="3" RadiusX="1.5" RadiusY="1.5"
+                                           Fill="{StaticResource PrimaryBrush}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Stretch"
+                                           Margin="0,6,-5,0"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
             <Button Grid.Column="2"
                     Content="+"
                     FontWeight="Bold"
@@ -111,7 +148,7 @@
         </Grid>
 
         <!-- 工具栏 -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
+        <Grid Grid.Row="3" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button x:Name="AddFolderButton"
                         Content="添加目录"
@@ -140,42 +177,58 @@
                     Click="ExportButton_Click"/>
         </Grid>
 
-        <!-- 结果表格 -->
-        <DataGrid x:Name="ResultDataGrid"
-                  Grid.Row="3"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
-                <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
-                <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
-                <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="FontWeight" Value="Medium"/>
-                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
-                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
-                                    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
-                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- 结果卡片 -->
+        <Border Grid.Row="4"
+                Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="4">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Top"
+                           Text="结果预览"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Margin="14,10,0,8"/>
+                <DataGrid x:Name="ResultDataGrid"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserResizeRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
+                        <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
+                        <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
+                        <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
+                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
+                                            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
+                                            <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
 
         <!-- 状态栏 -->
-        <Grid Grid.Row="4" Margin="0,12,0,0">
+        <Grid Grid.Row="5" Margin="4,14,4,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <TextBlock Text="已选择"
                            FontSize="13"
@@ -185,7 +238,7 @@
                            Text="0"
                            FontSize="13"
                            FontWeight="SemiBold"
-                           Foreground="{StaticResource PrimaryTextBrush}"
+                           Foreground="{StaticResource PrimaryBrush}"
                            Margin="4,0,4,0"
                            VerticalAlignment="Center"/>
                 <TextBlock Text="个文件"

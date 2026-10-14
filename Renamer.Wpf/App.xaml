@@ -4,12 +4,54 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- HandyControl 3.5 默认主题：全部控件（Button/TextBox/ComboBox/DataGrid/Menu 等）
-                 自动套用隐式样式，业务窗口只引用主题画笔，不做外观定制。 -->
+            <!-- HandyControl 3.5.1 默认主题：控件隐式样式来自 Theme.xaml -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- ==== 清新现代 · 薄荷青主题 ====
+                 覆盖 HC 颜色键即可全局换肤：HC 的画笔（PrimaryBrush、RegionBrush、
+                 SuccessBrush、PrimaryTextBrush 等）全部以 DynamicResource 引用这些颜色，
+                 因此在此重定义颜色，按钮/标签/输入框/表格/状态色会一并跟随。 -->
+            <Color x:Key="PrimaryColor">#14B8A6</Color>
+            <Color x:Key="DarkPrimaryColor">#0E9C8C</Color>
+            <Color x:Key="LightPrimaryColor">#E6F8F5</Color>
+            <Color x:Key="TitleColor">#0E9C8C</Color>
+            <Color x:Key="SecondaryTitleColor">#14B8A6</Color>
+            <Color x:Key="AccentColor">#14B8A6</Color>
+            <Color x:Key="DarkAccentColor">#0E9C8C</Color>
+
+            <!-- 状态色：成功/危险/警告/信息 -->
+            <Color x:Key="SuccessColor">#22C55E</Color>
+            <Color x:Key="DarkSuccessColor">#16A34A</Color>
+            <Color x:Key="LightSuccessColor">#ECFDF3</Color>
+            <Color x:Key="DangerColor">#F43F5E</Color>
+            <Color x:Key="DarkDangerColor">#E11D48</Color>
+            <Color x:Key="LightDangerColor">#FFF1F3</Color>
+            <Color x:Key="WarningColor">#F59E0B</Color>
+            <Color x:Key="DarkWarningColor">#D97706</Color>
+            <Color x:Key="LightWarningColor">#FFF8EB</Color>
+            <Color x:Key="InfoColor">#0EA5E9</Color>
+            <Color x:Key="DarkInfoColor">#0284C7</Color>
+            <Color x:Key="LightInfoColor">#EFF8FE</Color>
+
+            <!-- 文本 / 描边 / 表面 -->
+            <Color x:Key="PrimaryTextColor">#1F2A37</Color>
+            <Color x:Key="SecondaryTextColor">#5B6774</Color>
+            <Color x:Key="ThirdlyTextColor">#9AA5B1</Color>
+            <Color x:Key="ReverseTextColor">#1F2A37</Color>
+            <Color x:Key="BorderColor">#E4E9F0</Color>
+            <Color x:Key="SecondaryBorderColor">#94A3B8</Color>
+            <Color x:Key="RegionColor">#FFFFFF</Color>
+            <Color x:Key="SecondaryRegionColor">#F3F5F8</Color>
+            <Color x:Key="ThirdlyRegionColor">#FFFFFF</Color>
+            <Color x:Key="BackgroundColor">#EEF1F5</Color>
+
+            <!-- 应用自有语义画笔：画布 / 卡片 / 卡片描边 -->
+            <SolidColorBrush x:Key="AppCanvasBrush" Color="#F4F6F9"/>
+            <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="CardBorderBrush" Color="#E4E9F0"/>
 
             <!-- 表达式输入框使用等宽字体，属于功能需要，非外观定制 -->
             <FontFamily x:Key="MonoFont">"Cascadia Code", "Consolas", "Courier New", monospace</FontFamily>
