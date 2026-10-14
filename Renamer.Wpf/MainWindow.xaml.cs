@@ -45,11 +45,9 @@ namespace Com.Scm.Renamer
         {
             var prefix = new NamePrefixPattern();
             var surfix = new NameSuffixPattern();
-            var number = new NumberPattern { Length = 3 };
             var separator = new SeparatorPattern();
 
             QuickTags.Add(new QuickTagItem { Pattern = prefix });
-            QuickTags.Add(new QuickTagItem { Pattern = number });
             QuickTags.Add(new QuickTagItem { Pattern = separator });
             QuickTags.Add(new QuickTagItem { Pattern = surfix });
         }
@@ -77,7 +75,7 @@ namespace Com.Scm.Renamer
                     item.Click += TemplateMenuItem_Click;
                     menu.Items.Add(item);
                 }
-                ExpressionMenuButton.ContextMenu = menu;
+                BtMenu.ContextMenu = menu;
             }
             catch
             {
@@ -99,7 +97,7 @@ namespace Com.Scm.Renamer
                 pattern.Encode();
                 value += pattern.Pattern;
             }
-            ExpressionTextBox.Text = value;
+            TbText.Text = value;
         }
 
         private void TemplateMenuItem_Click(object sender, RoutedEventArgs e)
@@ -126,7 +124,12 @@ namespace Com.Scm.Renamer
             SelectedCountText.Text = FileItems.Count.ToString();
         }
 
-        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 添加目录事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtAddDir_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog
             {
@@ -152,7 +155,12 @@ namespace Com.Scm.Renamer
             }
         }
 
-        private void AddFileButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 添加文件事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtAddDoc_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -184,12 +192,22 @@ namespace Com.Scm.Renamer
             });
         }
 
+        /// <summary>
+        /// 预览
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtPreview_Click(object sender, RoutedEventArgs e)
         {
             RunPreview();
         }
 
-        private void ExecuteRenameButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 更名
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtExecute_Click(object sender, RoutedEventArgs e)
         {
             if (FileItems.Count == 0)
             {
@@ -201,7 +219,7 @@ namespace Com.Scm.Renamer
             Renamer renamer;
             try
             {
-                renamer = Renamer.Compile(ExpressionTextBox.Text);
+                renamer = Renamer.Compile(TbText.Text);
             }
             catch (TemplateParseException ex)
             {
@@ -215,17 +233,22 @@ namespace Com.Scm.Renamer
                 FileItems[i].ApplyCoreItem(coreItems[i]);
             }
 
-            if (!plan.CanCommit)
-            {
-                System.Windows.MessageBox.Show($"执行完成，但有 {plan.Issues.Count} 个错误，请查看表格中的异常信息。", "完成", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            else
+            if (plan.CanCommit)
             {
                 System.Windows.MessageBox.Show($"重命名完成，共处理 {coreItems.Count} 个文件。", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            else
+            {
+                System.Windows.MessageBox.Show($"执行完成，但有 {plan.Issues.Count} 个错误，请查看表格中的异常信息。", "完成", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
-        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 导出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtExport_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
@@ -266,13 +289,18 @@ namespace Com.Scm.Renamer
             return value;
         }
 
-        private void ExpressionMenuButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 快捷菜单
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtMenu_Click(object sender, RoutedEventArgs e)
         {
-            if (ExpressionMenuButton.ContextMenu != null)
+            if (BtMenu.ContextMenu != null)
             {
-                ExpressionMenuButton.ContextMenu.PlacementTarget = ExpressionMenuButton;
-                ExpressionMenuButton.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-                ExpressionMenuButton.ContextMenu.IsOpen = true;
+                BtMenu.ContextMenu.PlacementTarget = BtMenu;
+                BtMenu.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                BtMenu.ContextMenu.IsOpen = true;
             }
             else
             {
@@ -280,6 +308,11 @@ namespace Com.Scm.Renamer
             }
         }
 
+        /// <summary>
+        /// 左侧添加
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagAddStart_Click(object sender, RoutedEventArgs e)
         {
             var menu = new System.Windows.Controls.ContextMenu();
@@ -295,6 +328,11 @@ namespace Com.Scm.Renamer
             menu.IsOpen = true;
         }
 
+        /// <summary>
+        /// 右侧添加
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagAddEnd_Click(object sender, RoutedEventArgs e)
         {
             var menu = new System.Windows.Controls.ContextMenu();
@@ -395,6 +433,11 @@ namespace Com.Scm.Renamer
             }
         }
 
+        /// <summary>
+        /// 片段删除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagItem_Delete(object sender, EventArgs e)
         {
             if (sender is FrameworkElement fe && fe.DataContext is QuickTagItem item)
@@ -405,6 +448,11 @@ namespace Com.Scm.Renamer
             showPattern();
         }
 
+        /// <summary>
+        /// 鼠标事件预览，用于判断当前操作类型
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _suppressNextChipClick = false;
@@ -444,6 +492,11 @@ namespace Com.Scm.Renamer
             _dragItem = null;
         }
 
+        /// <summary>
+        /// 片段拖拽经过
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagItem_DragOver(object sender, System.Windows.DragEventArgs e)
         {
             if (!e.Data.GetDataPresent(typeof(QuickTagItem)) || sender is not System.Windows.Controls.Grid grid)
@@ -458,6 +511,11 @@ namespace Com.Scm.Renamer
             e.Handled = true;
         }
 
+        /// <summary>
+        /// 片段拖拽离开
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagItem_DragLeave(object sender, System.Windows.DragEventArgs e)
         {
             // 鼠标移到子元素也会触发 DragLeave，延后判定是否真正离开当前项
@@ -473,6 +531,11 @@ namespace Com.Scm.Renamer
             }
         }
 
+        /// <summary>
+        /// 片段拖拽放下
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QuickTagItem_Drop(object sender, System.Windows.DragEventArgs e)
         {
             ClearDropHint();
@@ -568,9 +631,9 @@ namespace Com.Scm.Renamer
                 var insertItem = new System.Windows.Controls.MenuItem { Header = "插入到表达式" };
                 insertItem.Click += (s, _) =>
                 {
-                    ExpressionTextBox.Text += item.Expression;
-                    ExpressionTextBox.Focus();
-                    ExpressionTextBox.CaretIndex = ExpressionTextBox.Text.Length;
+                    TbText.Text += item.Expression;
+                    TbText.Focus();
+                    TbText.CaretIndex = TbText.Text.Length;
                 };
                 menu.Items.Add(insertItem);
 
@@ -602,6 +665,10 @@ namespace Com.Scm.Renamer
             showPattern();
         }
 
+        /// <summary>
+        /// 窗口快捷键处理
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
         {
             base.OnKeyDown(e);
@@ -622,7 +689,7 @@ namespace Com.Scm.Renamer
             Renamer renamer;
             try
             {
-                renamer = Renamer.Compile(ExpressionTextBox.Text);
+                renamer = Renamer.Compile(TbText.Text);
             }
             catch (TemplateParseException ex)
             {

@@ -3,8 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:local="clr-namespace:Com.Scm.Renamer"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         Title="文件更名" Height="640" Width="920"
         Background="{StaticResource AppCanvasBrush}"
@@ -59,17 +59,18 @@
                     Foreground="{StaticResource SecondaryTextBrush}"
                     Margin="0,0,8,0"/>
                 <Button
-                    x:Name="ExpressionMenuButton"
+                    x:Name="BtMenu"
                     Content="?"
                     Style="{StaticResource ButtonIconCircular}"
                     hc:IconElement.Geometry="{StaticResource AddGeometry}"
                     DockPanel.Dock="Right"
                     Margin="12,0,0,0"
-                    Click="ExpressionMenuButton_Click"/>
+                    Click="BtMenu_Click"/>
                 <TextBox
-                    x:Name="ExpressionTextBox"
+                    x:Name="TbText"
                     Height="38"
                     FontSize="14"
+                    IsReadOnly="True"
                     VerticalContentAlignment="Center"
                     FontFamily="{StaticResource MonoFont}"
                     Text="&lt;*&gt;&lt;.&gt;&lt;?&gt;"/>
@@ -151,31 +152,31 @@
         <!-- 工具栏 -->
         <Grid Grid.Row="3" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button x:Name="AddFolderButton"
+                <Button x:Name="BtAddDir"
                         Content="添加目录"
                         Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
-                        Click="AddFolderButton_Click"/>
-                <Button x:Name="AddFileButton"
+                        Click="BtAddDir_Click"/>
+                <Button x:Name="BtAddDoc"
                         Content="添加文件"
                         Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
-                        Click="AddFileButton_Click"/>
-                <Button x:Name="RefreshPreviewButton"
+                        Click="BtAddDoc_Click"/>
+                <Button x:Name="BtPreview"
                         Content="刷新预览"
                         Style="{StaticResource ButtonDefault}"
                         Margin="0,0,10,0"
                         Click="BtPreview_Click"/>
-                <Button x:Name="ExecuteRenameButton"
+                <Button x:Name="BtExecute"
                         Content="执行更名"
                         Style="{StaticResource ButtonPrimary}"
-                        Click="ExecuteRenameButton_Click"/>
+                        Click="BtExecute_Click"/>
             </StackPanel>
-            <Button x:Name="ExportButton"
+            <Button x:Name="BtExport"
                     Content="导出"
                     Style="{StaticResource ButtonDefault}"
                     HorizontalAlignment="Right"
-                    Click="ExportButton_Click"/>
+                    Click="BtExport_Click"/>
         </Grid>
 
         <!-- 结果卡片 -->
