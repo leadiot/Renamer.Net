@@ -512,7 +512,7 @@ namespace Com.Scm.Renamer.Pattern
             {
                 pattern += GetDir();
                 pattern += From;
-                pattern += PATTERN_SPLIT + To;
+                pattern += PATTERN_SPLIT + To.ToString();
                 return pattern;
             }
 
@@ -520,7 +520,7 @@ namespace Com.Scm.Renamer.Pattern
             {
                 pattern += GetDir();
                 pattern += From;
-                pattern += PATTERN_SPLIT + To;
+                pattern += PATTERN_SPLIT + To.ToString();
                 pattern += PATTERN_ESCAPE + DstText;
                 return pattern;
             }

@@ -1,4 +1,5 @@
 using Com.Scm.Renamer.Pattern;
+using System.Windows;
 
 namespace Com.Scm.Renamer.Editor
 {
@@ -13,52 +14,106 @@ namespace Com.Scm.Renamer.Editor
             InitializeComponent();
         }
 
+        // OpBox 下拉项索引：0 不变 / 1 转大写 / 2 转小写 / 3 截取 / 4 插入 / 5 删除 / 6 区间替换 / 7 文字替换
+        private const int IdxNone = 0;
+        private const int IdxUpper = 1;
+        private const int IdxLower = 2;
+        private const int IdxCut = 3;
+        private const int IdxInsert = 4;
+        private const int IdxDelete = 5;
+        private const int IdxReplace1 = 6;
+        private const int IdxReplace2 = 7;
+
         /// <summary>从模型加载当前值到输入控件。</summary>
         public void LoadFrom(NamePattern pattern)
         {
-            CaseBox.SelectedIndex = pattern.ToUpper ? 1 : (pattern.ToLower ? 2 : 0);
-            OpBox.SelectedIndex = pattern.Opt switch
-            {
-                OptEnum.Cut => 1,
-                OptEnum.Insert => 2,
-                OptEnum.Delete => 3,
-                OptEnum.Replace1 => 4,
-                OptEnum.Replace2 => 5,
-                _ => 0
-            };
+            OpBox.SelectedIndex = pattern.ToUpper ? IdxUpper
+                : pattern.ToLower ? IdxLower
+                : pattern.Opt switch
+                {
+                    OptEnum.Cut => IdxCut,
+                    OptEnum.Insert => IdxInsert,
+                    OptEnum.Delete => IdxDelete,
+                    OptEnum.Replace1 => IdxReplace1,
+                    OptEnum.Replace2 => IdxReplace2,
+                    _ => IdxNone
+                };
             DirBox.SelectedIndex = pattern.Dir == DirEnum.Right ? 1 : 0;
-            FromBox.Text = pattern.From > 0 ? pattern.From.ToString() : "";
-            ToBox.Text = pattern.To > 0 ? pattern.To.ToString() : "";
-            LenBox.Text = pattern.Length > 0 ? pattern.Length.ToString() : "";
-            SrcBox.Text = pattern.SrcText ?? "";
-            DstBox.Text = pattern.DstText ?? "";
+            TbFrom.Text = pattern.From > 0 ? pattern.From.ToString() : "";
+            TbTo.Text = pattern.To > 0 ? pattern.To.ToString() : "";
+            TbLength.Text = pattern.Length.ToString();
+            TbSrc.Text = pattern.SrcText ?? "";
+            TbDst.Text = pattern.DstText ?? "";
         }
 
         /// <summary>将输入控件值回写到模型。</summary>
         public void ApplyTo(NamePattern pattern)
         {
-            pattern.ToUpper = CaseBox.SelectedIndex == 1;
-            pattern.ToLower = CaseBox.SelectedIndex == 2;
+            // 大小写转换与位置操作互斥：选中转大写/转小写时清空 Opt，选中位置操作时清空大小写标志
+            pattern.ToUpper = OpBox.SelectedIndex == IdxUpper;
+            pattern.ToLower = OpBox.SelectedIndex == IdxLower;
             pattern.Opt = OpBox.SelectedIndex switch
             {
-                1 => OptEnum.Cut,
-                2 => OptEnum.Insert,
-                3 => OptEnum.Delete,
-                4 => OptEnum.Replace1,
-                5 => OptEnum.Replace2,
+                IdxCut => OptEnum.Cut,
+                IdxInsert => OptEnum.Insert,
+                IdxDelete => OptEnum.Delete,
+                IdxReplace1 => OptEnum.Replace1,
+                IdxReplace2 => OptEnum.Replace2,
                 _ => OptEnum.None
             };
             pattern.Dir = DirBox.SelectedIndex == 1 ? DirEnum.Right : DirEnum.Left;
-            pattern.From = ParseInt(FromBox.Text, 1);
-            pattern.To = ParseInt(ToBox.Text, 1);
-            pattern.Length = ParseInt(LenBox.Text, 1);
-            pattern.SrcText = SrcBox.Text;
-            pattern.DstText = DstBox.Text;
+            pattern.From = ParseInt(TbFrom.Text, 1);
+            pattern.To = ParseInt(TbTo.Text, 1);
+            pattern.Length = ParseInt(TbLength.Text, 1);
+            pattern.SrcText = TbSrc.Text;
+            pattern.DstText = TbDst.Text;
         }
 
         private static int ParseInt(string s, int defaultValue)
         {
             return int.TryParse(s?.Trim(), out int v) ? v : defaultValue;
+        }
+
+        private void OpBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            // InitializeComponent 添加候选项期间不触发选中变更，这里只需防空引用
+            if (LbFrom == null)
+            {
+                return;
+            }
+
+            // 默认全部隐藏，再按操作类型展开所需字段
+            SetFields(from: false, to: false, length: false, src: false, dst: false);
+
+            switch (OpBox.SelectedIndex)
+            {
+                case IdxCut:           // 截取：From + To
+                    SetFields(from: true, to: true);
+                    break;
+                case IdxInsert:        // 插入：From + Dst
+                    SetFields(from: true, dst: true);
+                    break;
+                case IdxDelete:        // 删除：From + To（位置区间）
+                    SetFields(from: true, to: true);
+                    break;
+                case IdxReplace1:      // 区间替换：From + To + Dst
+                    SetFields(from: true, to: true, dst: true);
+                    break;
+                case IdxReplace2:      // 文字替换：Src + Dst
+                    SetFields(src: true, dst: true);
+                    break;
+                    // 不变 / 转大写 / 转小写：无参数字段，保持全部隐藏
+            }
+        }
+
+        private void SetFields(bool from = false, bool to = false, bool length = false, bool src = false, bool dst = false)
+        {
+            Visibility v(bool show) => show ? Visibility.Visible : Visibility.Collapsed;
+            LbFrom.Visibility = TbFrom.Visibility = v(from);
+            LbTo.Visibility = TbTo.Visibility = v(to);
+            LbLength.Visibility = TbLength.Visibility = v(length);
+            LbSrc.Visibility = TbSrc.Visibility = v(src);
+            LbDst.Visibility = TbDst.Visibility = v(dst);
         }
     }
 }

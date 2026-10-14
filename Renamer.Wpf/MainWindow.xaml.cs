@@ -495,6 +495,8 @@ namespace Com.Scm.Renamer
             int insertAt = insertAfter ? targetIndex + 1 : targetIndex;
             QuickTags.Insert(insertAt, source);
             e.Handled = true;
+
+            showPattern();
         }
 
         private void ShowDropHint(System.Windows.Controls.Grid grid, bool insertAfter)
