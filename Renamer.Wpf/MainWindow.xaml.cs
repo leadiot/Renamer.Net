@@ -3,7 +3,6 @@ using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using Com.Scm.Renamer.Dto;
 using Com.Scm.Renamer.Dvo;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -37,7 +36,7 @@ namespace Com.Scm.Renamer
         {
             LoadTemplates();
             InitDefaultQuickTags();
-            showPattern();
+            ShowPattern();
             UpdateStatus();
         }
 
@@ -72,7 +71,7 @@ namespace Com.Scm.Renamer
                         Header = $"{t.Name}    {t.Pattern}",
                         Tag = t.Pattern,
                     };
-                    item.Click += TemplateMenuItem_Click;
+                    item.Click += MiMenu_Click;
                     menu.Items.Add(item);
                 }
                 BtMenu.ContextMenu = menu;
@@ -83,7 +82,7 @@ namespace Com.Scm.Renamer
             }
         }
 
-        private void showPattern()
+        private void ShowPattern()
         {
             var value = "";
             foreach (var tag in QuickTags)
@@ -100,194 +99,12 @@ namespace Com.Scm.Renamer
             TbText.Text = value;
         }
 
-        private void TemplateMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is System.Windows.Controls.MenuItem mi && mi.Tag is string pattern)
-            {
-                if (string.IsNullOrWhiteSpace(pattern))
-                {
-                    return;
-                }
-
-                var patterns = TemplateParser.Parse(pattern);
-                QuickTags.Clear();
-                foreach (var tmp in patterns)
-                {
-                    QuickTags.Add(new QuickTagItem { Pattern = tmp });
-                }
-                showPattern();
-            }
-        }
-
         private void UpdateStatus()
         {
             SelectedCountText.Text = FileItems.Count.ToString();
         }
 
-        /// <summary>
-        /// 添加目录事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtAddDir_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog
-            {
-                Title = "选择要添加的文件夹",
-                IsFolderPicker = true
-            };
-
-            if (dialog.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
-            {
-                string folder = dialog.FileName;
-                try
-                {
-                    foreach (string file in Directory.EnumerateFiles(folder))
-                    {
-                        AddFileInternal(file);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                UpdateStatus();
-            }
-        }
-
-        /// <summary>
-        /// 添加文件事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtAddDoc_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "选择要重命名的文件",
-                Multiselect = true
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                foreach (string file in dialog.FileNames)
-                {
-                    AddFileInternal(file);
-                }
-                UpdateStatus();
-            }
-        }
-
-        private void AddFileInternal(string path)
-        {
-            if (FileItems.Any(x => string.Equals(x.Path, path, StringComparison.OrdinalIgnoreCase)))
-            {
-                return;
-            }
-
-            FileItems.Add(new FileItemDvo
-            {
-                Path = path,
-                SrcName = System.IO.Path.GetFileName(path)
-            });
-        }
-
-        /// <summary>
-        /// 预览
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtPreview_Click(object sender, RoutedEventArgs e)
-        {
-            RunPreview();
-        }
-
-        /// <summary>
-        /// 更名
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtExecute_Click(object sender, RoutedEventArgs e)
-        {
-            if (FileItems.Count == 0)
-            {
-                System.Windows.MessageBox.Show("请先添加文件", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            var coreItems = FileItems.Select(x => x.ToItem()).ToList();
-            Renamer renamer;
-            try
-            {
-                renamer = Renamer.Compile(TbText.Text);
-            }
-            catch (TemplateParseException ex)
-            {
-                System.Windows.MessageBox.Show($"表达式解析失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            RenamePlan plan = renamer.Commit(coreItems, ConflictMode.AutoSuffix);
-            for (int i = 0; i < coreItems.Count; i++)
-            {
-                FileItems[i].ApplyCoreItem(coreItems[i]);
-            }
-
-            if (plan.CanCommit)
-            {
-                System.Windows.MessageBox.Show($"重命名完成，共处理 {coreItems.Count} 个文件。", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                System.Windows.MessageBox.Show($"执行完成，但有 {plan.Issues.Count} 个错误，请查看表格中的异常信息。", "完成", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        /// <summary>
-        /// 导出
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtExport_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.SaveFileDialog
-            {
-                Title = "导出重命名计划",
-                Filter = "文本文件 (*.txt)|*.txt|CSV 文件 (*.csv)|*.csv",
-                DefaultExt = "txt"
-            };
-
-            if (dialog.ShowDialog() != true)
-            {
-                return;
-            }
-
-            try
-            {
-                var sb = new StringBuilder();
-                sb.AppendLine("原始名称,结果名称,执行结果,异常信息");
-                foreach (FileItemDvo item in FileItems)
-                {
-                    sb.AppendLine($"{EscapeCsv(item.SrcName)},{EscapeCsv(item.DstName ?? string.Empty)},{EscapeCsv(item.ResultStatus ?? string.Empty)},{EscapeCsv(item.IssueMessage ?? string.Empty)}");
-                }
-
-                File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
-                System.Windows.MessageBox.Show("导出成功", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"导出失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private static string EscapeCsv(string value)
-        {
-            if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
-            {
-                return "\"" + value.Replace("\"", "\"\"") + "\"";
-            }
-            return value;
-        }
+        #region 事件处理
 
         /// <summary>
         /// 快捷菜单
@@ -305,6 +122,30 @@ namespace Com.Scm.Renamer
             else
             {
                 System.Windows.MessageBox.Show("未找到模板文件 template.json", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// 模板菜单事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MiMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.MenuItem mi && mi.Tag is string pattern)
+            {
+                if (string.IsNullOrWhiteSpace(pattern))
+                {
+                    return;
+                }
+
+                var patterns = TemplateParser.Parse(pattern);
+                QuickTags.Clear();
+                foreach (var tmp in patterns)
+                {
+                    QuickTags.Add(new QuickTagItem { Pattern = tmp });
+                }
+                ShowPattern();
             }
         }
 
@@ -348,65 +189,7 @@ namespace Com.Scm.Renamer
             menu.IsOpen = true;
         }
 
-        private void AddTypeMenu(System.Windows.Controls.ContextMenu menu, string header, PatternType type, bool start)
-        {
-            var item = new System.Windows.Controls.MenuItem { Header = header, Tag = type };
-            item.Click += (s, _) => OnPatternTypeChosen(type, start);
-            menu.Items.Add(item);
-        }
-
-        private void OnPatternTypeChosen(PatternType type, bool start)
-        {
-            RenamerPattern pattern;
-            bool ok;
-            switch (type)
-            {
-                case PatternType.Prefix:
-                    pattern = new NamePrefixPattern();
-                    ok = new Editor.NamePrefixEditor((NamePrefixPattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Suffix:
-                    pattern = new NameSuffixPattern();
-                    ok = new Editor.NameSurfixEditor((NameSuffixPattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Text:
-                    pattern = new TextPattern();
-                    ok = new Editor.TextEditor((TextPattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Number:
-                    pattern = new NumberPattern();
-                    ok = new Editor.NumberEditor((NumberPattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Letter:
-                    pattern = new LetterPattern();
-                    ok = new Editor.LetterEditor((LetterPattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Time:
-                    pattern = new TimePattern();
-                    ok = new Editor.TimeEditor((TimePattern)pattern) { Owner = this }.ShowDialog() == true;
-                    break;
-                case PatternType.Separator:
-                    pattern = new SeparatorPattern();
-                    ok = true;
-                    break;
-                default:
-                    return;
-            }
-            if (!ok) return;
-
-            pattern.Encode();
-            if (start)
-            {
-                QuickTags.Insert(0, new QuickTagItem { Pattern = pattern });
-            }
-            else
-            {
-                QuickTags.Add(new QuickTagItem { Pattern = pattern });
-            }
-
-            showPattern();
-        }
-
+        #region 模式列表事件
         private QuickTagItem _dragItem;
         private System.Windows.Point _dragStartPoint;
         private bool _dragArmed;
@@ -445,7 +228,7 @@ namespace Com.Scm.Renamer
                 QuickTags.Remove(item);
             }
 
-            showPattern();
+            ShowPattern();
         }
 
         /// <summary>
@@ -560,7 +343,248 @@ namespace Com.Scm.Renamer
             QuickTags.Insert(insertAt, source);
             e.Handled = true;
 
-            showPattern();
+            ShowPattern();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 添加目录事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtAddDir_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog
+            {
+                Title = "选择要添加的文件夹",
+                IsFolderPicker = true
+            };
+
+            if (dialog.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+            {
+                string folder = dialog.FileName;
+                try
+                {
+                    foreach (string file in Directory.EnumerateFiles(folder))
+                    {
+                        AddFileInternal(file);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                UpdateStatus();
+            }
+        }
+
+        /// <summary>
+        /// 添加文件事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtAddDoc_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择要重命名的文件",
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                foreach (string file in dialog.FileNames)
+                {
+                    AddFileInternal(file);
+                }
+                UpdateStatus();
+            }
+        }
+
+        /// <summary>
+        /// 预览
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtPreview_Click(object sender, RoutedEventArgs e)
+        {
+            RunPreview();
+        }
+
+        /// <summary>
+        /// 更名
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtExecute_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileItems.Count == 0)
+            {
+                System.Windows.MessageBox.Show("请先添加文件", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var coreItems = FileItems.Select(x => x.ToItem()).ToList();
+            Renamer renamer;
+            try
+            {
+                renamer = Renamer.Compile(TbText.Text);
+            }
+            catch (TemplateParseException ex)
+            {
+                System.Windows.MessageBox.Show($"表达式解析失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            RenamePlan plan = renamer.Commit(coreItems, ConflictMode.AutoSuffix);
+            for (int i = 0; i < coreItems.Count; i++)
+            {
+                FileItems[i].ApplyCoreItem(coreItems[i]);
+            }
+
+            if (plan.CanCommit)
+            {
+                System.Windows.MessageBox.Show($"重命名完成，共处理 {coreItems.Count} 个文件。", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show($"执行完成，但有 {plan.Issues.Count} 个错误，请查看表格中的异常信息。", "完成", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 导出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtExport_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "导出重命名计划",
+                Filter = "文本文件 (*.txt)|*.txt|CSV 文件 (*.csv)|*.csv",
+                DefaultExt = "txt"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("原始名称,结果名称,执行结果,异常信息");
+                foreach (FileItemDvo item in FileItems)
+                {
+                    sb.AppendLine($"{EscapeCsv(item.SrcName)},{EscapeCsv(item.DstName ?? string.Empty)},{EscapeCsv(item.ResultStatus ?? string.Empty)},{EscapeCsv(item.IssueMessage ?? string.Empty)}");
+                }
+
+                File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
+                System.Windows.MessageBox.Show("导出成功", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"导出失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 窗口快捷键处理
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key == Key.R && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                RunPreview();
+            }
+        }
+
+        #endregion
+
+        private void AddFileInternal(string path)
+        {
+            if (FileItems.Any(x => string.Equals(x.Path, path, StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            FileItems.Add(new FileItemDvo
+            {
+                Path = path,
+                SrcName = System.IO.Path.GetFileName(path)
+            });
+        }
+
+        private static string EscapeCsv(string value)
+        {
+            if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+            {
+                return "\"" + value.Replace("\"", "\"\"") + "\"";
+            }
+            return value;
+        }
+
+        private void AddTypeMenu(System.Windows.Controls.ContextMenu menu, string header, PatternType type, bool start)
+        {
+            var item = new System.Windows.Controls.MenuItem { Header = header, Tag = type };
+            item.Click += (s, _) => OnPatternTypeChosen(type, start);
+            menu.Items.Add(item);
+        }
+
+        private void OnPatternTypeChosen(PatternType type, bool start)
+        {
+            RenamerPattern pattern;
+            bool ok;
+            switch (type)
+            {
+                case PatternType.Prefix:
+                    pattern = new NamePrefixPattern();
+                    ok = new Editor.NamePrefixEditor((NamePrefixPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Suffix:
+                    pattern = new NameSuffixPattern();
+                    ok = new Editor.NameSurfixEditor((NameSuffixPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Text:
+                    pattern = new TextPattern();
+                    ok = new Editor.TextEditor((TextPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Number:
+                    pattern = new NumberPattern();
+                    ok = new Editor.NumberEditor((NumberPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Letter:
+                    pattern = new LetterPattern();
+                    ok = new Editor.LetterEditor((LetterPattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Time:
+                    pattern = new TimePattern();
+                    ok = new Editor.TimeEditor((TimePattern)pattern) { Owner = this }.ShowDialog() == true;
+                    break;
+                case PatternType.Separator:
+                    pattern = new SeparatorPattern();
+                    ok = true;
+                    break;
+                default:
+                    return;
+            }
+            if (!ok) return;
+
+            pattern.Encode();
+            if (start)
+            {
+                QuickTags.Insert(0, new QuickTagItem { Pattern = pattern });
+            }
+            else
+            {
+                QuickTags.Add(new QuickTagItem { Pattern = pattern });
+            }
+
+            ShowPattern();
         }
 
         private void ShowDropHint(System.Windows.Controls.Grid grid, bool insertAfter)
@@ -662,20 +686,7 @@ namespace Com.Scm.Renamer
 
             item.Pattern.Encode();
             item.Refresh();
-            showPattern();
-        }
-
-        /// <summary>
-        /// 窗口快捷键处理
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-            if (e.Key == Key.R && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                RunPreview();
-            }
+            ShowPattern();
         }
 
         private void RunPreview()
@@ -698,29 +709,6 @@ namespace Com.Scm.Renamer
             }
 
             renamer.Preview(coreItems, ConflictMode.AutoSuffix);
-        }
-    }
-
-    /// <summary>
-    /// 将绑定到的宽度减去固定偏移量，用于约束横向滚动区域的最大宽度，
-    /// 使快捷标签过多时出现横向滚动条，而不是把窗口撑宽。
-    /// </summary>
-    public sealed class WidthOffsetConverter : System.Windows.Data.IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            double width = value is double d ? d : 0;
-            double offset = 0;
-            if (parameter != null)
-            {
-                double.TryParse(parameter.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out offset);
-            }
-            return Math.Max(0, width - offset);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
         }
     }
 }
