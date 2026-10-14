@@ -54,8 +54,9 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     Content="+"
-                    Style="{StaticResource ButtonPrimary}"
+                    FontWeight="Bold"
                     Margin="0,0,8,0"
+                    Style="{StaticResource ButtonPrimary}"
                     Click="QuickTagAddStart_Click"/>
             <ItemsControl Grid.Column="1"
                           x:Name="QuickTagList"
@@ -68,7 +69,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,6,8,0"
+                        <Grid Margin="4,0"
                               AllowDrop="True"
                               DragOver="QuickTagItem_DragOver"
                               DragLeave="QuickTagItem_DragLeave"
@@ -103,6 +104,8 @@
             </ItemsControl>
             <Button Grid.Column="2"
                     Content="+"
+                    FontWeight="Bold"
+                    Margin="8,0,0,0"
                     Style="{StaticResource ButtonPrimary}"
                     Click="QuickTagAddEnd_Click"/>
         </Grid>

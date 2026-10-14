@@ -127,28 +127,28 @@ namespace Com.Scm.Renamer
 
         private void AddFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            //using var dialog = new System.Windows.Forms.FolderBrowserDialog
-            //{
-            //    ShowNewFolderButton = false
-            //};
+            var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog
+            {
+                Title = "选择要添加的文件夹",
+                IsFolderPicker = true
+            };
 
-            //if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            //{
-            //    string folder = dialog.SelectedPath;
-            //    try
-            //    {
-            //        var files = Directory.EnumerateFiles(folder);
-            //        foreach (string file in files)
-            //        {
-            //            AddFileInternal(file);
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            //    }
-            //    UpdateStatus();
-            //}
+            if (dialog.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+            {
+                string folder = dialog.FileName;
+                try
+                {
+                    foreach (string file in Directory.EnumerateFiles(folder))
+                    {
+                        AddFileInternal(file);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"读取目录失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                UpdateStatus();
+            }
         }
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
