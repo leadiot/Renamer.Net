@@ -1,14 +1,12 @@
 <UserControl x:Class="Com.Scm.Renamer.Editor.NameEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol">
     <UserControl.Resources>
         <Style x:Key="EditorLabel" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,10,0,2"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
-        </Style>
-        <Style x:Key="EditorInput" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-            <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
     </UserControl.Resources>
 
@@ -30,14 +28,14 @@
             <ComboBoxItem Content="右起"/>
         </ComboBox>
         <TextBlock Name="LbFrom" Text="起始位置 From（1 基）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="TbFrom" Style="{StaticResource EditorInput}"/>
+        <hc:NumericUpDown Name="TbFrom" Minimum="1"/>
         <TextBlock Name="LbTo" Text="结束位置 To（截取/区间替换，1 基含端点）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="TbTo" Style="{StaticResource EditorInput}"/>
+        <hc:NumericUpDown Name="TbTo" Minimum="1"/>
         <TextBlock Name="LbLength" Text="长度 Length（删除）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="TbLength" Style="{StaticResource EditorInput}"/>
+        <hc:NumericUpDown Name="TbLength" Minimum="1"/>
         <TextBlock Name="LbSrc" Text="源文本 SrcText（文字替换的被替换串）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="TbSrc" Style="{StaticResource EditorInput}"/>
+        <TextBox x:Name="TbSrc"/>
         <TextBlock Name="LbDst" Text="目标文本 DstText（插入/替换的目标串）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="TbDst" Style="{StaticResource EditorInput}"/>
+        <TextBox x:Name="TbDst"/>
     </StackPanel>
 </UserControl>

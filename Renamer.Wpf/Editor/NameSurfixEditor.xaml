@@ -8,12 +8,19 @@
         Background="{StaticResource AppCanvasBrush}"
         ShowInTaskbar="False"
         KeyDown="Window_KeyDown">
-    <StackPanel Margin="20">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
         <editor:NameEditor x:Name="Fields"/>
 
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
             <Button Content="确定"
                     Style="{StaticResource ButtonPrimary}"
                     Width="80"
@@ -24,5 +31,5 @@
                     Width="80"
                     Click="CancelButton_Click"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

@@ -1,6 +1,7 @@
 <Window x:Class="Com.Scm.Renamer.Editor.LetterEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         Width="420" Height="420"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -15,25 +16,33 @@
         </Style>
     </Window.Resources>
 
-    <StackPanel Margin="20">
-        <TextBlock Text="字符集" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="SetBox">
-            <ComboBoxItem Content="小写字母 (a-z)"/>
-            <ComboBoxItem Content="大写字母 (A-Z)"/>
-            <ComboBoxItem Content="自定义字符集"/>
-        </ComboBox>
-        <TextBlock Text="自定义字符集（选择&quot;自定义字符集&quot;时生效）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="CustomBox" Margin="0,0,0,4"/>
-        <TextBlock Text="位宽（左侧补首字符，0 不补齐）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="LenBox" Margin="0,0,0,4"/>
-        <TextBlock Text="起始序数（默认 0）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="StartBox" Margin="0,0,0,4"/>
-        <TextBlock Text="步增量（默认 1，支持负）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="StepBox" Margin="0,0,0,4"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
+        <StackPanel>
+            <TextBlock Text="字符集" Style="{StaticResource EditorLabel}"/>
+            <ComboBox x:Name="SetBox">
+                <ComboBoxItem Content="小写字母 (a-z)"/>
+                <ComboBoxItem Content="大写字母 (A-Z)"/>
+                <ComboBoxItem Content="自定义字符集"/>
+            </ComboBox>
+            <TextBlock Text="自定义字符集（选择&quot;自定义字符集&quot;时生效）" Style="{StaticResource EditorLabel}"/>
+            <TextBox x:Name="CustomBox"/>
+            <TextBlock Text="位宽（左侧补首字符，0 不补齐）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="LenBox" Minimum="0"/>
+            <TextBlock Text="起始序数（默认 0）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="StartBox" Minimum="0"/>
+            <TextBlock Text="步增量（默认 1，支持负）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="StepBox"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
             <Button Content="确定"
                     Style="{StaticResource ButtonPrimary}"
                     Width="80"
@@ -44,5 +53,5 @@
                     Width="80"
                     Click="CancelButton_Click"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

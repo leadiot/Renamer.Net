@@ -1,6 +1,7 @@
 <Window x:Class="Com.Scm.Renamer.Editor.NumberEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         Width="420" Height="300"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -15,17 +16,25 @@
         </Style>
     </Window.Resources>
 
-    <StackPanel Margin="20">
-        <TextBlock Text="位宽（默认 0，不补齐；非零时，如不足则左侧补0）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="LenBox" Margin="0,0,0,4"/>
-        <TextBlock Text="起始值（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="StartBox" Margin="0,0,0,4"/>
-        <TextBlock Text="步增量（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="StepBox" Margin="0,0,0,4"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
+        <StackPanel>
+            <TextBlock Text="位宽（默认 0，不补齐；非零时，如不足则左侧补0）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="LenBox"/>
+            <TextBlock Text="起始值（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="StartBox"/>
+            <TextBlock Text="步增量（默认 1，仅支持正整数）" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="StepBox"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
             <Button Content="确定"
                     Style="{StaticResource ButtonPrimary}"
                     Width="80"
@@ -36,5 +45,5 @@
                     Width="80"
                     Click="CancelButton_Click"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

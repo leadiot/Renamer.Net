@@ -15,13 +15,21 @@
         </Style>
     </Window.Resources>
 
-    <StackPanel Margin="20">
-        <TextBlock Text="固定文本" Style="{StaticResource EditorLabel}"/>
-        <TextBox x:Name="ContentBox" Margin="0,0,0,4"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
+        <StackPanel>
+            <TextBlock Text="固定文本" Style="{StaticResource EditorLabel}"/>
+            <TextBox x:Name="ContentBox" Margin="0,0,0,4"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
             <Button Content="确定"
                     Style="{StaticResource ButtonPrimary}"
                     Width="80"
@@ -32,5 +40,5 @@
                     Width="80"
                     Click="CancelButton_Click"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>
