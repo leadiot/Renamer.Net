@@ -8,6 +8,8 @@ namespace Com.Scm.Renamer
     ///   4) 确认后提交磁盘改名（Commit）
     /// 仅处理目录下的直接文件（不递归子目录）。
     /// 也支持命令行参数：Renamer.Cmd &lt;目录&gt; &lt;表达式&gt; [冲突策略 fail|auto]
+    /// 首参数为 help / --help / -h / /? 时输出表达式使用说明并退出；
+    /// 交互输入 help / ? / ？亦可随时查看。
     /// </summary>
     public static class Program
     {
@@ -26,6 +28,13 @@ namespace Com.Scm.Renamer
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+            // 首参数为帮助指令时，输出表达式使用说明后退出
+            if (args.Length > 0 && IsHelp(args[0]))
+            {
+                HelpText.Print();
+                return 0;
+            }
+
             Console.WriteLine("==============================================================");
             Console.WriteLine("           文件批量更名工具（表达式驱动）");
             Console.WriteLine("==============================================================");
@@ -34,7 +43,7 @@ namespace Com.Scm.Renamer
             Console.WriteLine("    <*|lower|rep:abc:XYZ>.<?>");
             Console.WriteLine("    <|\"c:yyyyMMdd>_<*>.<?>");
             Console.WriteLine("    <*><.><?>（无扩展名文件不产生尾随点）");
-            Console.WriteLine("输入 q 可随时退出。");
+            Console.WriteLine("输入 help 查看表达式使用说明，输入 q 可随时退出。");
             Console.WriteLine();
 
             // 命令行参数：目录、表达式、冲突策略；未提供的项进入交互输入
@@ -166,6 +175,11 @@ namespace Com.Scm.Renamer
                 {
                     return null;
                 }
+                if (IsHelp(input))
+                {
+                    HelpText.Print();
+                    continue;
+                }
                 if (!string.IsNullOrWhiteSpace(input) && Directory.Exists(input))
                 {
                     return input.Trim();
@@ -225,6 +239,11 @@ namespace Com.Scm.Renamer
                 if (input == null || IsQuit(input))
                 {
                     return null;
+                }
+                if (IsHelp(input))
+                {
+                    HelpText.Print();
+                    continue;
                 }
                 if (string.IsNullOrWhiteSpace(input))
                 {
@@ -345,6 +364,25 @@ namespace Com.Scm.Renamer
         private static bool IsQuit(string? input)
         {
             return string.Equals(input?.Trim(), "q", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 判断输入是否为帮助指令：help / --help / -h / /? / ? / ？，不区分大小写。
+        /// </summary>
+        private static bool IsHelp(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            string text = input.Trim();
+            return text.Equals("help", StringComparison.OrdinalIgnoreCase)
+                || text.Equals("--help", StringComparison.OrdinalIgnoreCase)
+                || text.Equals("-h", StringComparison.OrdinalIgnoreCase)
+                || text.Equals("/?", StringComparison.OrdinalIgnoreCase)
+                || text == "?"
+                || text == "？";
         }
 
         /// <summary>

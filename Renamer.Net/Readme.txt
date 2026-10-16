@@ -231,7 +231,7 @@
 
 7.1 标准流程
 --------------------------------------------------------------------------------
-  Renamer2 renamer  = Renamer2.Compile(template);      // 模板非法抛 TemplateParseException
+  Renamer renamer  = Renamer.Compile(template);      // 模板非法抛 TemplateParseException
   RenamePlan plan   = renamer.Preview(files, mode);    // 只读检测，不触碰磁盘
   if (plan.CanCommit) plan = renamer.Commit(files, mode); // File.Move 实际改名
 
