@@ -104,6 +104,18 @@ namespace Com.Scm.Renamer
             SelectedCountText.Text = FileItems.Count.ToString();
         }
 
+        /// <summary>
+        /// 删除结果表格中的指定行（从文件列表移除该项）。
+        /// </summary>
+        private void DeleteRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is FileItemDvo item)
+            {
+                FileItems.Remove(item);
+                UpdateStatus();
+            }
+        }
+
         #region 事件处理
 
         /// <summary>

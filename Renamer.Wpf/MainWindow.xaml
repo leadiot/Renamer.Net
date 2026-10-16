@@ -49,7 +49,7 @@
                 CornerRadius="14"
                 Padding="18,16"
                 Margin="0,0,0,14">
-            <DockPanel LastChildFill="True">
+            <DockPanel>
                 <TextBlock
                     Text="表达式"
                     FontSize="13"
@@ -78,8 +78,7 @@
         </Border>
 
         <!-- 快捷表达式列表 -->
-        <Grid Grid.Row="2" Margin="0,0,0,14"
-              HorizontalAlignment="Center">
+        <Grid Grid.Row="2" Margin="0,0,0,14" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -186,47 +185,52 @@
                 BorderThickness="1"
                 CornerRadius="14"
                 Padding="4">
-            <DockPanel LastChildFill="True">
-                <TextBlock DockPanel.Dock="Top"
-                           Text="结果预览"
-                           FontSize="13"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource SecondaryTextBrush}"
-                           Margin="14,10,0,8"/>
-                <DataGrid x:Name="ResultDataGrid"
+            <DataGrid x:Name="ResultDataGrid"
                           Background="Transparent"
                           BorderThickness="0"
                           AutoGenerateColumns="False"
+                          IsReadOnly="True"
                           CanUserAddRows="False"
                           CanUserDeleteRows="False"
                           CanUserResizeRows="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
-                        <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
-                        <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
-                        <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="FontWeight" Value="Medium"/>
-                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
-                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
-                                            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
-                                            <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
+                    <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
+                    <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
+                    <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ResultStatus}" Value="失败">
+                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ResultStatus}" Value="跳过">
+                                        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ResultStatus}" Value="已消解">
+                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Header="操作" Width="70" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="删除"
+                                            Style="{StaticResource ButtonDefault}"
+                                            Padding="10,2"
+                                            FontSize="12"
+                                            Foreground="{StaticResource DangerBrush}"
+                                            Click="DeleteRowButton_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
         <!-- 状态栏 -->
