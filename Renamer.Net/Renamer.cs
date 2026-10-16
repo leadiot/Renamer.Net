@@ -28,7 +28,22 @@ namespace Com.Scm.Renamer
         /// </summary>
         private static readonly string TempPrefix = ".__renamer_tmp_";
 
-        private readonly List<RenamePattern> patterns = new List<RenamePattern>();
+        private readonly List<RenamePattern> _Patterns = new List<RenamePattern>();
+
+        public void Add(RenamePattern pattern)
+        {
+            if (pattern == null)
+            {
+                throw new ArgumentNullException(nameof(pattern));
+            }
+
+            this._Patterns.Add(pattern);
+        }
+
+        public void Clear()
+        {
+            _Patterns.Clear();
+        }
 
         /// <summary>
         /// 编译模板并返回执行器；模板非法时抛出 <see cref="TemplateParseException"/>。
@@ -41,15 +56,6 @@ namespace Com.Scm.Renamer
                 renamer.Add(pattern);
             }
             return renamer;
-        }
-
-        public void Add(RenamePattern pattern)
-        {
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
-            this.patterns.Add(pattern);
         }
 
         /// <summary>
@@ -348,7 +354,7 @@ namespace Com.Scm.Renamer
         private bool Evaluate(FileItem item)
         {
             item.DstName = string.Empty;
-            foreach (RenamePattern pattern in this.patterns)
+            foreach (RenamePattern pattern in this._Patterns)
             {
                 if (!pattern.GenName(item))
                 {
@@ -425,8 +431,7 @@ namespace Com.Scm.Renamer
             return string.Equals(item.SrcName, candidate, StringComparison.Ordinal);
         }
 
-        private static Dictionary<string, FileItem> GetDirMap(
-            Dictionary<string, Dictionary<string, FileItem>> maps, string dir)
+        private static Dictionary<string, FileItem> GetDirMap(Dictionary<string, Dictionary<string, FileItem>> maps, string dir)
         {
             string key = dir ?? "\0virtual";
             if (!maps.TryGetValue(key, out Dictionary<string, FileItem> map))
@@ -457,8 +462,7 @@ namespace Com.Scm.Renamer
             GetDirMap(claimed, dir)[name] = item;
         }
 
-        private static HashSet<string> GetExisting(
-            Dictionary<string, HashSet<string>> cache, string dir)
+        private static HashSet<string> GetExisting(Dictionary<string, HashSet<string>> cache, string dir)
         {
             string key = dir ?? "\0virtual";
             if (cache.TryGetValue(key, out HashSet<string> set))

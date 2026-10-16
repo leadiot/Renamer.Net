@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Com.Scm.Renamer
+﻿namespace Com.Scm.Renamer
 {
     /// <summary>
     /// 一条阻断性问题
