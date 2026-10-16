@@ -40,7 +40,8 @@ namespace Com.Scm.Renamer
         /// <summary>
         /// 预览：对全部文件独立求值并做冲突检测，不触碰磁盘。
         /// 检测项：求值异常、空文件名、非法文件名字符、批次内重名（大小写不敏感）、
-        /// 目标已被同目录现有文件占用。AutoSuffix 模式下冲突会自动以“ (n)”消解。
+        /// 目标已被同目录现有文件占用（若占用者本身在批次内且将被改名移走，则视为可用）。
+        /// AutoSuffix 模式下冲突会自动以“ (n)”消解。
         /// </summary>
         public RenamePlan Preview(List<FileItem> fileList, ConflictMode mode = ConflictMode.Fail)
         {
@@ -53,6 +54,7 @@ namespace Com.Scm.Renamer
             var existingCache = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             var claimed = new Dictionary<string, Dictionary<string, FileItem>>(StringComparer.OrdinalIgnoreCase);
 
+            // Pass 1：对全部文件求值（单项失败不影响其余）
             for (int k = 0; k < fileList.Count; k++)
             {
                 FileItem item = fileList[k];
@@ -62,7 +64,6 @@ namespace Com.Scm.Renamer
 
                 LoadTimes(item);
 
-                // 1) 求值（单项失败不影响其余文件的预览）
                 try
                 {
                     item.DstName = string.Empty;
@@ -76,10 +77,39 @@ namespace Com.Scm.Renamer
                     item.Status = RenameStatus.Error;
                     item.IssueMessage = ex.Message;
                     plan.Issues.Add(new RenameIssue(item, IssueKind.EvalError, "表达式求值失败：" + ex.Message));
+                }
+            }
+
+            // 构建“将被改名移走”的映射：(目录|原名) -> 对应 FileItem。
+            // 用于占用检测时跳过批次内会被移走的源文件，从而支持循环/链式改名。
+            var willMove = new Dictionary<string, FileItem>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in fileList)
+            {
+                if (item.Status == RenameStatus.Error)
+                {
+                    continue;
+                }
+                string dir = GetDirectory(item);
+                string originalName = System.IO.Path.GetFileName(item.Path);
+                string candidate = item.DstName ?? string.Empty;
+                if (candidate.Length == 0)
+                {
+                    continue;
+                }
+                if (!string.Equals(candidate, originalName, StringComparison.OrdinalIgnoreCase))
+                {
+                    willMove[BuildMoveKey(dir, originalName)] = item;
+                }
+            }
+
+            // Pass 2：文件名校验与冲突检测
+            foreach (FileItem item in fileList)
+            {
+                if (item.Status == RenameStatus.Error)
+                {
                     continue;
                 }
 
-                // 2) 文件名内容校验
                 string candidate = item.DstName ?? string.Empty;
                 if (candidate.Length == 0)
                 {
@@ -95,7 +125,6 @@ namespace Com.Scm.Renamer
 
                 string dir = GetDirectory(item);
 
-                // 3) 同名/占用检测与消解
                 bool isNoChange = IsSameAsSource(item, candidate);
                 string resolved = candidate;
                 bool duplicated = IsClaimed(claimed, dir, resolved, item, out FileItem clashItem);
@@ -103,12 +132,12 @@ namespace Com.Scm.Renamer
                 string existingPath = null;
                 if (!duplicated)
                 {
-                    occupied = IsExistingOccupied(existingCache, dir, item, resolved, out existingPath);
+                    occupied = IsExistingOccupied(existingCache, willMove, dir, item, resolved, out existingPath);
                 }
 
                 if ((duplicated || occupied) && mode == ConflictMode.AutoSuffix)
                 {
-                    resolved = ResolveUnique(existingCache, claimed, dir, item, candidate);
+                    resolved = ResolveUnique(existingCache, claimed, willMove, dir, item, candidate);
                     item.DstName = resolved;
                     item.Status = RenameStatus.Resolved;
                     item.IssueMessage = "原名冲突，已自动调整为：" + resolved;
@@ -137,10 +166,32 @@ namespace Com.Scm.Renamer
             return plan;
         }
 
+        private static string BuildMoveKey(string dir, string name)
+        {
+            return (dir ?? "\0virtual") + "|" + name;
+        }
+
         /// <summary>
-        /// 预览通过后提交磁盘改名（同目录 File.Move，不覆盖已有文件）。
-        /// NoChange 跳过；无 Path 的项记为 IoError；任一失败则保留问题并返回。
-        /// 注意：交换式改名链（a→b、b→a）需调用方排序或引入临时名，不在本阶段处理。
+        /// 临时名前缀，用于两阶段改名中标识中间状态文件。
+        /// </summary>
+        private static readonly string TempPrefix = ".__renamer_tmp_";
+
+        /// <summary>
+        /// 单文件改名步骤记录（原名 → 临时名 → 最终名），用于两阶段提交与回滚。
+        /// </summary>
+        private class RenameStep
+        {
+            public FileItem Item;
+            public string OriginalPath;
+            public string TempPath;
+            public string FinalPath;
+        }
+
+        /// <summary>
+        /// 预览通过后提交磁盘改名。采用两阶段策略：
+        /// Phase 1：每个文件在其所在目录内改名为唯一临时名（消解循环改名链 a↔b）；
+        /// Phase 2：再从临时名改到最终名。
+        /// Phase 1 任一失败则整体回滚；Phase 2 失败尽力回退到原名并上报。
         /// </summary>
         public RenamePlan Commit(List<FileItem> fileList, ConflictMode mode = ConflictMode.Fail)
         {
@@ -150,6 +201,7 @@ namespace Com.Scm.Renamer
                 return plan;
             }
 
+            var steps = new List<RenameStep>();
             foreach (FileItem item in plan.Items)
             {
                 if (item.Status == RenameStatus.NoChange || item.Status == RenameStatus.Error)
@@ -163,26 +215,122 @@ namespace Com.Scm.Renamer
                 }
 
                 string dir = Path.GetDirectoryName(item.Path);
-                string target = Path.Combine(dir ?? string.Empty, item.DstName);
-                if (string.Equals(item.Path, target, StringComparison.OrdinalIgnoreCase))
+                string finalPath = Path.Combine(dir ?? string.Empty, item.DstName);
+                if (string.Equals(item.Path, finalPath, StringComparison.OrdinalIgnoreCase))
                 {
                     item.Status = RenameStatus.NoChange;
                     continue;
                 }
 
+                steps.Add(new RenameStep
+                {
+                    Item = item,
+                    OriginalPath = item.Path,
+                    TempPath = Path.Combine(dir, GenerateTempName(dir, item.Path)),
+                    FinalPath = finalPath,
+                });
+            }
+
+            if (steps.Count == 0)
+            {
+                return plan;
+            }
+
+            // Phase 1：原 → 临时名
+            foreach (var step in steps)
+            {
                 try
                 {
-                    File.Move(item.Path, target);
-                    item.Status = RenameStatus.Ok;
-                    item.Path = target;
+                    File.Move(step.OriginalPath, step.TempPath);
                 }
                 catch (Exception ex)
                 {
-                    AddError(plan, item, IssueKind.IoError, "改名失败：" + ex.Message, target);
+                    RollbackPhase1(steps);
+                    AddError(plan, step.Item, IssueKind.IoError, "改名失败（阶段1）：" + ex.Message, step.TempPath);
+                    return plan;
+                }
+            }
+
+            // Phase 2：临时名 → 最终名
+            foreach (var step in steps)
+            {
+                try
+                {
+                    File.Move(step.TempPath, step.FinalPath);
+                    step.Item.Path = step.FinalPath;
+                    step.Item.Status = RenameStatus.Ok;
+                }
+                catch (Exception ex)
+                {
+                    AddError(plan, step.Item, IssueKind.IoError,
+                        "改名失败（阶段2）：" + ex.Message + "，文件当前位于：" + step.TempPath,
+                        step.FinalPath);
+                    TryRestoreToOriginal(step);
                 }
             }
 
             return plan;
+        }
+
+        /// <summary>
+        /// 生成目录内唯一的临时文件名（保留扩展名，便于识别）。
+        /// </summary>
+        private static string GenerateTempName(string dir, string originalPath)
+        {
+            string ext = Path.GetExtension(originalPath);
+            string tempName;
+            string tempPath;
+            do
+            {
+                tempName = TempPrefix + Guid.NewGuid().ToString("N") + ext;
+                tempPath = Path.Combine(dir, tempName);
+            } while (File.Exists(tempPath));
+            return tempName;
+        }
+
+        /// <summary>
+        /// Phase 1 失败回滚：把所有已改名到临时名的文件还原为原名。
+        /// 此时所有原名均未被占用，回滚安全。
+        /// </summary>
+        private static void RollbackPhase1(List<RenameStep> steps)
+        {
+            foreach (var step in steps)
+            {
+                if (File.Exists(step.TempPath) && !File.Exists(step.OriginalPath))
+                {
+                    try
+                    {
+                        File.Move(step.TempPath, step.OriginalPath);
+                    }
+                    catch
+                    {
+                        // 回滚失败不抛出，保留临时名由用户手动处理
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Phase 2 失败后尽力把文件从临时名还原为原名；若原名已被占用则放弃，保留临时名。
+        /// </summary>
+        private static void TryRestoreToOriginal(RenameStep step)
+        {
+            if (!File.Exists(step.TempPath))
+            {
+                return;
+            }
+            if (File.Exists(step.OriginalPath))
+            {
+                return; // 原名已被其他改名结果占用，无法回退
+            }
+            try
+            {
+                File.Move(step.TempPath, step.OriginalPath);
+            }
+            catch
+            {
+                // 保留在 TempPath，由用户处理
+            }
         }
 
         private bool Evaluate(FileItem item)
@@ -327,6 +475,7 @@ namespace Com.Scm.Renamer
 
         private static bool IsExistingOccupied(
             Dictionary<string, HashSet<string>> cache,
+            Dictionary<string, FileItem> willMove,
             string dir, FileItem item, string name, out string existingPath)
         {
             existingPath = null;
@@ -346,6 +495,16 @@ namespace Com.Scm.Renamer
             {
                 return false;
             }
+
+            // 若占用者是本批次内的文件且将被改名移走，则视为可用（支持循环/链式改名）
+            if (willMove.TryGetValue(BuildMoveKey(dir, name), out FileItem mover))
+            {
+                if (!string.Equals(mover.DstName, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
             existingPath = full;
             return true;
         }
@@ -356,6 +515,7 @@ namespace Com.Scm.Renamer
         private static string ResolveUnique(
             Dictionary<string, HashSet<string>> cache,
             Dictionary<string, Dictionary<string, FileItem>> claimed,
+            Dictionary<string, FileItem> willMove,
             string dir, FileItem item, string candidate)
         {
             NamePattern.SplitName(candidate, out string baseName, out string ext);
@@ -365,7 +525,7 @@ namespace Com.Scm.Renamer
             {
                 string tryName = baseName + " (" + n.ToString() + ")" + suffixExt;
                 if (!IsClaimed(claimed, dir, tryName, item, out _) &&
-                    !IsExistingOccupied(cache, dir, item, tryName, out _))
+                    !IsExistingOccupied(cache, willMove, dir, item, tryName, out _))
                 {
                     return tryName;
                 }

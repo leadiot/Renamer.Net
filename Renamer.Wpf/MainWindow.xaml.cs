@@ -29,7 +29,7 @@ namespace Com.Scm.Renamer
         private void InitView()
         {
             QuickTagList.ItemsSource = QuickTags;
-            ResultDataGrid.ItemsSource = FileItems;
+            GdResult.ItemsSource = FileItems;
         }
 
         private void InitData()

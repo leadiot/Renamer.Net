@@ -35,6 +35,11 @@ namespace Com.Scm.Renamer
         DateTime LastAccessTime { get; set; }
 
         /// <summary>
+        /// 临时名称
+        /// </summary>
+        string TmpName { get; set; }
+
+        /// <summary>
         /// 最终名称（AutoSuffix 消解冲突后为消解后的名称）
         /// </summary>
         string DstName { get; set; }

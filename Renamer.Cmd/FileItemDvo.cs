@@ -8,6 +8,7 @@
         public DateTime CreationTime { get; set; }
         public DateTime LastWriteTime { get; set; }
         public DateTime LastAccessTime { get; set; }
+        public string TmpName { get; set; }
         public string DstName { get; set; }
         public RenameStatus Status { get; set; }
         public string IssueMessage { get; set; }

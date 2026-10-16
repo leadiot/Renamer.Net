@@ -185,7 +185,7 @@
                 BorderThickness="1"
                 CornerRadius="14"
                 Padding="4">
-            <DataGrid x:Name="ResultDataGrid"
+            <DataGrid x:Name="GdResult"
                           Background="Transparent"
                           BorderThickness="0"
                           AutoGenerateColumns="False"

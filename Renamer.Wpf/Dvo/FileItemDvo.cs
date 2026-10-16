@@ -15,6 +15,8 @@
         private string srcName;
         public string SrcName { get { return srcName; } set { srcName = value; OnPropertyChanged(nameof(SrcName)); } }
 
+        public string TmpName { get; set; }
+
         private string dstName;
         public string DstName { get { return dstName; } set { dstName = value; OnPropertyChanged(nameof(DstName)); } }
 
