@@ -64,7 +64,7 @@ if (plan.CanCommit) plan = renamer.Commit(files, mode);  // 实际改名
 
 Wpf 版基于 HandyControl 构建，交互严格遵循六步流程：**输入目录 → 选择更名模板 → 手动输入表达式 → 编译 → 预览 → 确认提交**。顶部的快捷标签芯片可以一键插入常用表达式片段，每类模式都有独立的可视化编辑器窗口，预览表格实时呈现原始名称、结果名称、异常信息与状态，行内删除按钮可以在提交前剔除不需要处理的文件。
 
-![Renamer.Wpf 主窗口：表达式输入、快捷标签与预览结果](screenshots/wpf.png)
+![Renamer.Wpf 主窗口：表达式输入、快捷标签与预览结果](../screenshots/wpf.png)
 
 上图中，表达式 `IMAGE_<|*4><.><?>` 正在把五个源文件预览为 `IMAGE_0001.cs` 到 `IMAGE_0005.cs`——流水号按列表顺序发号，`Ctrl+R` 可随时刷新预览。
 
@@ -72,7 +72,7 @@ Wpf 版基于 HandyControl 构建，交互严格遵循六步流程：**输入目
 
 命令行版面向脚本与批处理场景，支持交互式输入（目录、表达式、冲突策略）和参数直调（`Renamer.Cmd 目录 表达式 [fail|auto]`）两种方式，启动时内置示例表达式提示：
 
-![Renamer.Cmd 命令行界面](screenshots/cmd.png)
+![Renamer.Cmd 命令行界面](../screenshots/cmd.png)
 
 ## 四、架构与工程实践
 
