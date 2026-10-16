@@ -24,19 +24,19 @@
 
         <StackPanel>
             <TextBlock Text="字符集" Style="{StaticResource EditorLabel}"/>
-            <ComboBox x:Name="SetBox">
+            <ComboBox x:Name="CbSet">
                 <ComboBoxItem Content="小写字母 (a-z)"/>
                 <ComboBoxItem Content="大写字母 (A-Z)"/>
                 <ComboBoxItem Content="自定义字符集"/>
             </ComboBox>
             <TextBlock Text="自定义字符集（选择&quot;自定义字符集&quot;时生效）" Style="{StaticResource EditorLabel}"/>
-            <TextBox x:Name="CustomBox"/>
+            <TextBox x:Name="CbCustom"/>
             <TextBlock Text="位宽（左侧补首字符，0 不补齐）" Style="{StaticResource EditorLabel}"/>
-            <hc:NumericUpDown Name="LenBox" Minimum="0"/>
-            <TextBlock Text="起始序数（默认 0）" Style="{StaticResource EditorLabel}"/>
-            <hc:NumericUpDown Name="StartBox" Minimum="0"/>
-            <TextBlock Text="步增量（默认 1，支持负）" Style="{StaticResource EditorLabel}"/>
-            <hc:NumericUpDown Name="StepBox"/>
+            <hc:NumericUpDown Name="TbLength" Minimum="0"/>
+            <TextBlock Text="起始序数" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="TbStart" Minimum="0"/>
+            <TextBlock Text="步增量" Style="{StaticResource EditorLabel}"/>
+            <hc:NumericUpDown Name="TbStep" Minimum="1"/>
         </StackPanel>
 
         <StackPanel

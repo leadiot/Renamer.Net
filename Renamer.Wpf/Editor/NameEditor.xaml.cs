@@ -27,7 +27,7 @@ namespace Com.Scm.Renamer.Editor
         /// <summary>从模型加载当前值到输入控件。</summary>
         public void LoadFrom(NamePattern pattern)
         {
-            OpBox.SelectedIndex = pattern.ToUpper ? IdxUpper
+            CbOpt.SelectedIndex = pattern.ToUpper ? IdxUpper
                 : pattern.ToLower ? IdxLower
                 : pattern.Opt switch
                 {
@@ -38,10 +38,10 @@ namespace Com.Scm.Renamer.Editor
                     OptEnum.Replace2 => IdxReplace2,
                     _ => IdxNone
                 };
-            DirBox.SelectedIndex = pattern.Dir == DirEnum.Right ? 1 : 0;
-            TbFrom.Text = pattern.From > 0 ? pattern.From.ToString() : "";
-            TbTo.Text = pattern.To > 0 ? pattern.To.ToString() : "";
-            TbLength.Text = pattern.Length.ToString();
+            CbDir.SelectedIndex = pattern.Dir == DirEnum.Right ? 1 : 0;
+            TbFrom.Value = pattern.From;
+            TbTo.Value = pattern.To;
+            TbLength.Value = pattern.Length;
             TbSrc.Text = pattern.SrcText ?? "";
             TbDst.Text = pattern.DstText ?? "";
         }
@@ -50,9 +50,9 @@ namespace Com.Scm.Renamer.Editor
         public void ApplyTo(NamePattern pattern)
         {
             // 大小写转换与位置操作互斥：选中转大写/转小写时清空 Opt，选中位置操作时清空大小写标志
-            pattern.ToUpper = OpBox.SelectedIndex == IdxUpper;
-            pattern.ToLower = OpBox.SelectedIndex == IdxLower;
-            pattern.Opt = OpBox.SelectedIndex switch
+            pattern.ToUpper = CbOpt.SelectedIndex == IdxUpper;
+            pattern.ToLower = CbOpt.SelectedIndex == IdxLower;
+            pattern.Opt = CbOpt.SelectedIndex switch
             {
                 IdxCut => OptEnum.Cut,
                 IdxInsert => OptEnum.Insert,
@@ -61,20 +61,15 @@ namespace Com.Scm.Renamer.Editor
                 IdxReplace2 => OptEnum.Replace2,
                 _ => OptEnum.None
             };
-            pattern.Dir = DirBox.SelectedIndex == 1 ? DirEnum.Right : DirEnum.Left;
-            pattern.From = ParseInt(TbFrom.Text, 1);
-            pattern.To = ParseInt(TbTo.Text, 1);
-            pattern.Length = ParseInt(TbLength.Text, 1);
+            pattern.Dir = CbDir.SelectedIndex == 1 ? DirEnum.Right : DirEnum.Left;
+            pattern.From = (int)TbFrom.Value;
+            pattern.To = (int)TbTo.Value;
+            pattern.Length = (int)TbLength.Value;
             pattern.SrcText = TbSrc.Text;
             pattern.DstText = TbDst.Text;
         }
 
-        private static int ParseInt(string s, int defaultValue)
-        {
-            return int.TryParse(s?.Trim(), out int v) ? v : defaultValue;
-        }
-
-        private void OpBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void CbOpt_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             // InitializeComponent 添加候选项期间不触发选中变更，这里只需防空引用
             if (LbFrom == null)
@@ -82,33 +77,34 @@ namespace Com.Scm.Renamer.Editor
                 return;
             }
 
-            // 默认全部隐藏，再按操作类型展开所需字段
-            SetFields(from: false, to: false, length: false, src: false, dst: false);
-
-            switch (OpBox.SelectedIndex)
+            switch (CbOpt.SelectedIndex)
             {
                 case IdxCut:           // 截取：From + To
-                    SetFields(from: true, to: true);
+                    SetFields(dir: true, from: true, to: true);
                     break;
                 case IdxInsert:        // 插入：From + Dst
-                    SetFields(from: true, dst: true);
+                    SetFields(dir: true, from: true, dst: true);
                     break;
                 case IdxDelete:        // 删除：From + To（位置区间）
-                    SetFields(from: true, to: true);
+                    SetFields(dir: true, from: true, to: true);
                     break;
                 case IdxReplace1:      // 区间替换：From + To + Dst
-                    SetFields(from: true, to: true, dst: true);
+                    SetFields(dir: true, from: true, to: true, dst: true);
                     break;
                 case IdxReplace2:      // 文字替换：Src + Dst
                     SetFields(src: true, dst: true);
                     break;
+                default:
                     // 不变 / 转大写 / 转小写：无参数字段，保持全部隐藏
+                    SetFields(dir: false, from: false, to: false, length: false, src: false, dst: false);
+                    break;
             }
         }
 
-        private void SetFields(bool from = false, bool to = false, bool length = false, bool src = false, bool dst = false)
+        private void SetFields(bool dir = false, bool from = false, bool to = false, bool length = false, bool src = false, bool dst = false)
         {
             Visibility v(bool show) => show ? Visibility.Visible : Visibility.Collapsed;
+            LbDir.Visibility = CbDir.Visibility = v(dir);
             LbFrom.Visibility = TbFrom.Visibility = v(from);
             LbTo.Visibility = TbTo.Visibility = v(to);
             LbLength.Visibility = TbLength.Visibility = v(length);

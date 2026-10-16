@@ -24,29 +24,29 @@ namespace Com.Scm.Renamer.Editor
         /// <summary>从模型加载当前值到输入控件。</summary>
         private void LoadFields()
         {
-            SetBox.SelectedIndex = (_pattern.Letters != null && _pattern.Letters.Length > 0) ? 2 : (_pattern.IsUpper ? 1 : 0);
-            CustomBox.Text = _pattern.Letters != null ? new string(_pattern.Letters) : "";
-            LenBox.Text = _pattern.Length > 0 ? _pattern.Length.ToString() : "";
-            StartBox.Text = _pattern.Start.ToString();
-            StepBox.Text = _pattern.Step.ToString();
+            CbSet.SelectedIndex = (_pattern.Letters != null && _pattern.Letters.Length > 0) ? 2 : (_pattern.IsUpper ? 1 : 0);
+            CbCustom.Text = _pattern.Letters != null ? new string(_pattern.Letters) : "";
+            TbLength.Value = _pattern.Length;
+            TbStart.Value = _pattern.Start;
+            TbStep.Value = _pattern.Step;
         }
 
         /// <summary>确认后将输入控件值回写到模型。</summary>
         private void ApplyFields()
         {
-            if (SetBox.SelectedIndex == 2)
+            if (CbSet.SelectedIndex == 2)
             {
-                var cs = CustomBox.Text ?? "";
+                var cs = CbCustom.Text ?? "";
                 _pattern.Letters = cs.Length > 0 ? cs.ToCharArray() : null;
             }
             else
             {
                 _pattern.Letters = null;
-                _pattern.IsUpper = SetBox.SelectedIndex == 1;
+                _pattern.IsUpper = CbSet.SelectedIndex == 1;
             }
-            _pattern.Length = ParseInt(LenBox.Text, 0);
-            _pattern.Start = ParseInt(StartBox.Text, 0);
-            _pattern.Step = ParseInt(StepBox.Text, 1);
+            _pattern.Length = (int)TbLength.Value;
+            _pattern.Start = (int)TbStart.Value;
+            _pattern.Step = (int)TbStep.Value;
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -73,11 +73,6 @@ namespace Com.Scm.Renamer.Editor
             {
                 Close();
             }
-        }
-
-        private static int ParseInt(string s, int defaultValue)
-        {
-            return int.TryParse(s?.Trim(), out int v) ? v : defaultValue;
         }
     }
 }

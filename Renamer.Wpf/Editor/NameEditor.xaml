@@ -12,7 +12,7 @@
 
     <StackPanel>
         <TextBlock Text="操作" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="OpBox" SelectionChanged="OpBox_SelectionChanged">
+        <ComboBox x:Name="CbOpt" SelectionChanged="CbOpt_SelectionChanged">
             <ComboBoxItem Content="不变"/>
             <ComboBoxItem Content="转大写"/>
             <ComboBoxItem Content="转小写"/>
@@ -22,20 +22,20 @@
             <ComboBoxItem Content="区间替换"/>
             <ComboBoxItem Content="文字替换"/>
         </ComboBox>
-        <TextBlock Text="方向（位置操作用）" Style="{StaticResource EditorLabel}"/>
-        <ComboBox x:Name="DirBox">
+        <TextBlock Name="LbDir" Text="方向" Style="{StaticResource EditorLabel}"/>
+        <ComboBox x:Name="CbDir">
             <ComboBoxItem Content="左起"/>
             <ComboBoxItem Content="右起"/>
         </ComboBox>
-        <TextBlock Name="LbFrom" Text="起始位置 From（1 基）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Name="LbFrom" Text="起始位置" Style="{StaticResource EditorLabel}"/>
         <hc:NumericUpDown Name="TbFrom" Minimum="1"/>
-        <TextBlock Name="LbTo" Text="结束位置 To（截取/区间替换，1 基含端点）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Name="LbTo" Text="结束位置" Style="{StaticResource EditorLabel}"/>
         <hc:NumericUpDown Name="TbTo" Minimum="1"/>
-        <TextBlock Name="LbLength" Text="长度 Length（删除）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Name="LbLength" Text="长度" Style="{StaticResource EditorLabel}"/>
         <hc:NumericUpDown Name="TbLength" Minimum="1"/>
-        <TextBlock Name="LbSrc" Text="源文本 SrcText（文字替换的被替换串）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Name="LbSrc" Text="来源文本" Style="{StaticResource EditorLabel}"/>
         <TextBox x:Name="TbSrc"/>
-        <TextBlock Name="LbDst" Text="目标文本 DstText（插入/替换的目标串）" Style="{StaticResource EditorLabel}"/>
+        <TextBlock Name="LbDst" Text="目标文本" Style="{StaticResource EditorLabel}"/>
         <TextBox x:Name="TbDst"/>
     </StackPanel>
 </UserControl>
