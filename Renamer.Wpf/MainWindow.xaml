@@ -151,24 +151,31 @@
         <!-- 工具栏 -->
         <Grid Grid.Row="3" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button x:Name="BtAddDir"
+                <hc:ButtonGroup>
+                    <Button x:Name="BtAddDir"
                         Content="添加目录"
                         Style="{StaticResource ButtonDefault}"
-                        Margin="0,0,10,0"
                         Click="BtAddDir_Click"/>
-                <Button x:Name="BtAddDoc"
+                    <Button x:Name="BtAddDoc"
                         Content="添加文件"
                         Style="{StaticResource ButtonDefault}"
-                        Margin="0,0,10,0"
                         Click="BtAddDoc_Click"/>
-                <Button x:Name="BtPreview"
-                        Content="刷新预览"
+                    <Button x:Name="BtClear"
+                        Content="清空列表"
                         Style="{StaticResource ButtonDefault}"
-                        Margin="0,0,10,0"
+                        Click="BtClear_Click"/>
+                </hc:ButtonGroup>
+                <Button x:Name="BtPreview"
+                        Content="预览"
+                        Style="{StaticResource ButtonPrimary}"
+                        Margin="10,0,0,0"
+                        Padding="20,0,20,0"
                         Click="BtPreview_Click"/>
                 <Button x:Name="BtExecute"
-                        Content="执行更名"
-                        Style="{StaticResource ButtonPrimary}"
+                        Content="更名"
+                        Margin="10,0,0,0"
+                        Padding="20,0,20,0"
+                        Style="{StaticResource ButtonDanger}"
                         Click="BtExecute_Click"/>
             </StackPanel>
             <Button x:Name="BtExport"

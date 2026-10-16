@@ -13,6 +13,11 @@ namespace Com.Scm.Renamer
     /// </summary>
     public class Renamer
     {
+        /// <summary>
+        /// 临时名前缀，用于两阶段改名中标识中间状态文件。
+        /// </summary>
+        private static readonly string TempPrefix = ".__renamer_tmp_";
+
         private readonly List<RenamerPattern> patterns = new List<RenamerPattern>();
 
         /// <summary>
@@ -66,7 +71,6 @@ namespace Com.Scm.Renamer
 
                 try
                 {
-                    item.DstName = string.Empty;
                     if (!Evaluate(item))
                     {
                         throw new InvalidOperationException("表达式求值返回失败");
@@ -172,11 +176,6 @@ namespace Com.Scm.Renamer
         }
 
         /// <summary>
-        /// 临时名前缀，用于两阶段改名中标识中间状态文件。
-        /// </summary>
-        private static readonly string TempPrefix = ".__renamer_tmp_";
-
-        /// <summary>
         /// 预览通过后提交磁盘改名。采用两阶段策略：
         /// Phase 1：每个文件在其所在目录内改名为唯一临时名（消解循环改名链 a↔b）；
         /// Phase 2：再从临时名改到最终名。
@@ -206,7 +205,7 @@ namespace Com.Scm.Renamer
 
                 string dir = Path.GetDirectoryName(item.Path);
                 string finalPath = Path.Combine(dir ?? string.Empty, item.DstName);
-                if (string.Equals(item.Path, finalPath, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(item.Path, finalPath, StringComparison.Ordinal))
                 {
                     item.Status = RenameStatus.NoChange;
                     continue;

@@ -116,6 +116,19 @@ namespace Com.Scm.Renamer
             }
         }
 
+        /// <summary>
+        /// 清空文件列表。
+        /// </summary>
+        private void BtClear_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileItems.Count == 0)
+            {
+                return;
+            }
+            FileItems.Clear();
+            UpdateStatus();
+        }
+
         #region 事件处理
 
         /// <summary>
