@@ -5,7 +5,6 @@ using Com.Scm.Renamer.Dvo;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -170,7 +169,7 @@ namespace Com.Scm.Renamer
         /// </summary>
         private void MiAbout_Click(object sender, RoutedEventArgs e)
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var version = App.VersionCode;
             System.Windows.MessageBox.Show(
                 $"文件更名（Renamer.Net）\n版本：v{version}",
                 "关于",

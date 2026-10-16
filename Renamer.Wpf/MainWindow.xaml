@@ -216,10 +216,10 @@
                           CanUserDeleteRows="False"
                           CanUserResizeRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*"/>
-                    <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*"/>
-                    <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*"/>
-                    <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*">
+                    <DataGridTextColumn Header="原始名称" Binding="{Binding SrcName}" Width="2*" CanUserSort="False"/>
+                    <DataGridTextColumn Header="结果名称" Binding="{Binding DstName}" Width="2*" CanUserSort="False"/>
+                    <DataGridTextColumn Header="异常信息" Binding="{Binding IssueMessage}" Width="1.5*" CanUserSort="False"/>
+                    <DataGridTextColumn Header="状态" Binding="{Binding ResultStatus}" Width="0.8*" CanUserSort="False">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="VerticalAlignment" Value="Center"/>

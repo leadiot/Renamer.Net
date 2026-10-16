@@ -1,4 +1,4 @@
-namespace Renamer.Wpf
+namespace Com.Scm.Renamer
 {
     /// <summary>
     /// Interaction logic for App.xaml
