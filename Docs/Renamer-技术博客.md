@@ -54,7 +54,7 @@ if (plan.CanCommit) plan = renamer.Commit(files, mode);  // 实际改名
 **Preview**：只读检测，可反复调用，绝不触碰磁盘。检测项按文件逐项收集、互不短路，包括求值异常、空目标名、非法字符、批次内重名（大小写不敏感）、目标路径被批次外文件占用等。冲突支持两种策略：
 
 - `Fail` —— 发现冲突即阻断提交；
-- `AutoSuffix` —— 自动在扩展名前追加 ` (n)` 消解，如 `FIXED.txt → FIXED (1).txt → FIXED (2).txt`，消解记录写入 Warnings。
+- `Auto` —— 自动在扩展名前追加 ` (n)` 消解，如 `FIXED.txt → FIXED (1).txt → FIXED (2).txt`，消解记录写入 Warnings。
 
 **Commit**：采用**同目录临时文件名的两阶段方案**。Phase 1 把待改名文件先改名为自身目录内的 `.__renamer_tmp_{GUID}{扩展名}`，Phase 1 失败自动回滚原名；全部成功后进入 Phase 2 改到最终名。这解决了交换式改名链（`a→b` 且 `b→a`）和循环改名在单趟提交下必然失败的问题，Phase 2 失败则尽力回退并上报临时路径。
 
