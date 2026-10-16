@@ -1,8 +1,8 @@
 namespace Com.Scm.Renamer
 {
     /// <summary>
-    /// 交互式批量重命名示例：
-    ///   1) 输入目录与重命名表达式
+    /// 交互式批量更名示例：
+    ///   1) 输入目录与更名表达式
     ///   2) 编译表达式（Compile）
     ///   3) 只读预览（Preview）并展示 原名 -> 新名、问题与自动消解警告
     ///   4) 确认后提交磁盘改名（Commit）
@@ -27,7 +27,7 @@ namespace Com.Scm.Renamer
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
             Console.WriteLine("==============================================================");
-            Console.WriteLine("           文件批量重命名工具（表达式驱动）");
+            Console.WriteLine("           文件批量更名工具（表达式驱动）");
             Console.WriteLine("==============================================================");
             Console.WriteLine("表达式示例：");
             Console.WriteLine("    IMAGE<|*4>-<*>.<?>");
@@ -63,20 +63,21 @@ namespace Com.Scm.Renamer
                 return 1;
             }
 
-            // 2) 表达式（编译失败可重新输入）
+            // 2) 模板列表（从 template.json 读取）或直接输入表达式
+            List<TemplateItem> templates = LoadTemplates();
+            if (string.IsNullOrWhiteSpace(template))
+            {
+                template = PromptTemplateOrExpression(templates);
+                if (template == null)
+                {
+                    return 0;
+                }
+            }
+
+            // 3) 编译表达式（失败可重新输入）
             Renamer? renamer = null;
             while (renamer == null)
             {
-                if (string.IsNullOrWhiteSpace(template))
-                {
-                    Console.Write("请输入重命名表达式：");
-                    template = Console.ReadLine();
-                    if (IsQuit(template))
-                    {
-                        return 0;
-                    }
-                }
-
                 try
                 {
                     renamer = Renamer.Compile(template!);
@@ -86,17 +87,21 @@ namespace Com.Scm.Renamer
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("表达式错误（位置 {0}）：{1}", ex.Position, ex.Message);
                     Console.ResetColor();
-                    template = null; // 允许重新输入
+                    template = PromptTemplateOrExpression(templates);
+                    if (template == null)
+                    {
+                        return 0;
+                    }
                 }
             }
 
-            // 3) 冲突策略
+            // 4) 冲突策略
             if (args.Length <= 2)
             {
                 mode = PromptConflictMode();
             }
 
-            // 4) 收集目录下的直接文件
+            // 收集目录下的直接文件
             var files = Directory
                 .EnumerateFiles(dir)
                 .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
@@ -106,7 +111,8 @@ namespace Com.Scm.Renamer
             {
                 fileItems.Add(new FileItemDvo()
                 {
-                    Path = file
+                    Path = file,
+                    SrcName = Path.GetFileName(file)
                 });
             }
 
@@ -156,7 +162,7 @@ namespace Com.Scm.Renamer
             {
                 Console.Write("请输入目录路径：");
                 string? input = Console.ReadLine();
-                if (IsQuit(input))
+                if (input == null || IsQuit(input))
                 {
                     return null;
                 }
@@ -167,6 +173,71 @@ namespace Com.Scm.Renamer
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("目录不存在，请重新输入。");
                 Console.ResetColor();
+            }
+        }
+
+        /// <summary>
+        /// 从程序目录下的 template.json 读取更名模板列表；文件缺失或解析失败时返回空列表。
+        /// </summary>
+        private static List<TemplateItem> LoadTemplates()
+        {
+            var templates = new List<TemplateItem>();
+            string path = Path.Combine(AppContext.BaseDirectory, "template.json");
+            if (!File.Exists(path))
+            {
+                return templates;
+            }
+            try
+            {
+                string json = File.ReadAllText(path);
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return System.Text.Json.JsonSerializer.Deserialize<List<TemplateItem>>(json, options) ?? templates;
+            }
+            catch
+            {
+                return templates;
+            }
+        }
+
+        /// <summary>
+        /// 展示模板列表并等待用户选择；也可直接输入表达式（非数字内容视为表达式）。
+        /// </summary>
+        private static string? PromptTemplateOrExpression(List<TemplateItem> templates)
+        {
+            Console.WriteLine();
+            if (templates.Count > 0)
+            {
+                Console.WriteLine("请选择更名模板（输入序号），或直接输入表达式：");
+                for (int i = 0; i < templates.Count; i++)
+                {
+                    Console.WriteLine("  {0}) {1}    {2}", i + 1, templates[i].Name, templates[i].Pattern);
+                }
+            }
+            else
+            {
+                Console.WriteLine("未找到模板文件 template.json，请直接输入表达式。");
+            }
+
+            while (true)
+            {
+                Console.Write("输入模板序号或表达式：");
+                string? input = Console.ReadLine();
+                if (input == null || IsQuit(input))
+                {
+                    return null;
+                }
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    continue;
+                }
+                input = input.Trim();
+                if (int.TryParse(input, out int index) && index >= 1 && index <= templates.Count)
+                {
+                    var selected = templates[index - 1];
+                    Console.WriteLine("已选择模板：{0}", selected.Name);
+                    return selected.Pattern;
+                }
+                return input; // 视为表达式
             }
         }
 
@@ -274,6 +345,15 @@ namespace Com.Scm.Renamer
         private static bool IsQuit(string? input)
         {
             return string.Equals(input?.Trim(), "q", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 更名模板项（template.json 中的一条记录）。
+        /// </summary>
+        private class TemplateItem
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Pattern { get; set; } = string.Empty;
         }
     }
 }

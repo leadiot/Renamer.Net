@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,6 +11,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Renamer.Net\Renamer.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Renamer.Wpf\template.json" Link="template.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
