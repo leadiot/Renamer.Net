@@ -1,7 +1,6 @@
-using Com.Scm.Renamer;
 using Com.Scm.Renamer.Pattern;
 
-namespace Com.Scm.Filexp.Rename.Dvo.Pattern
+namespace Com.Scm.Renamer.Patterns
 {
     /// <summary>
     /// 文件名称前缀表达式

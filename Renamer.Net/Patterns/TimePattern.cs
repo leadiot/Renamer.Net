@@ -1,7 +1,6 @@
-using Com.Scm.Renamer;
 using System.Globalization;
 
-namespace Com.Scm.Filexp.Rename.Dvo.Pattern
+namespace Com.Scm.Renamer.Patterns
 {
     /// <summary>
     /// 时间信息。语法：
@@ -11,7 +10,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// |":format             当前时间 + 格式（唯一写法，裸格式 |"format 已移除）
     /// 缺省格式为 yyyyMMddHHmmss。
     /// </summary>
-    public class TimePattern : RenamerPattern
+    public class TimePattern : RenamePattern
     {
         public TimePattern()
         {

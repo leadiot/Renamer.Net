@@ -1,7 +1,6 @@
-using Com.Scm.Renamer;
 using Com.Scm.Renamer.Pattern;
 
-namespace Com.Scm.Filexp.Rename.Dvo.Pattern
+namespace Com.Scm.Renamer.Patterns
 {
     /// <summary>
     /// 条件分隔符 &lt;.&gt;：原文件存在扩展名时输出一个点，否则输出空串。
@@ -9,7 +8,7 @@ namespace Com.Scm.Filexp.Rename.Dvo.Pattern
     /// 点开头文件 .gitignore 与无点文件视为无扩展名）。
     /// 典型用法：&lt;*&gt;&lt;.&gt;&lt;?&gt;，无扩展名文件不会产生尾随点。
     /// </summary>
-    public class SeparatorPattern : RenamerPattern
+    public class SeparatorPattern : RenamePattern
     {
         public SeparatorPattern()
         {

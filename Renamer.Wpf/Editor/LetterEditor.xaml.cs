@@ -1,4 +1,4 @@
-using Com.Scm.Filexp.Rename.Dvo.Pattern;
+using Com.Scm.Renamer.Patterns;
 using System.Windows;
 using System.Windows.Input;
 

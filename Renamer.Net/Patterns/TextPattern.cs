@@ -1,11 +1,9 @@
-using Com.Scm.Renamer;
-
-namespace Com.Scm.Filexp.Rename.Dvo.Pattern
+namespace Com.Scm.Renamer.Patterns
 {
     /// <summary>
     /// 固定文本
     /// </summary>
-    public class TextPattern : RenamerPattern
+    public class TextPattern : RenamePattern
     {
         public TextPattern()
         {

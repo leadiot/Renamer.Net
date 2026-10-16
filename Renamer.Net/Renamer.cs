@@ -1,4 +1,3 @@
-using Com.Scm.Filexp.Rename.Dvo;
 using Com.Scm.Renamer.Pattern;
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ namespace Com.Scm.Renamer
         /// </summary>
         private static readonly string TempPrefix = ".__renamer_tmp_";
 
-        private readonly List<RenamerPattern> patterns = new List<RenamerPattern>();
+        private readonly List<RenamePattern> patterns = new List<RenamePattern>();
 
         /// <summary>
         /// 编译模板并返回执行器；模板非法时抛出 <see cref="TemplateParseException"/>。
@@ -37,14 +36,14 @@ namespace Com.Scm.Renamer
         public static Renamer Compile(string template)
         {
             var renamer = new Renamer();
-            foreach (RenamerPattern pattern in TemplateParser.Parse(template))
+            foreach (RenamePattern pattern in TemplateParser.Parse(template))
             {
                 renamer.Add(pattern);
             }
             return renamer;
         }
 
-        public void Add(RenamerPattern pattern)
+        public void Add(RenamePattern pattern)
         {
             if (pattern == null)
             {
@@ -150,7 +149,7 @@ namespace Com.Scm.Renamer
                     occupied = IsExistingOccupied(existingCache, willMove, dir, item, resolved, out existingPath);
                 }
 
-                if ((duplicated || occupied) && mode == ConflictMode.AutoSuffix)
+                if ((duplicated || occupied) && mode == ConflictMode.Auto)
                 {
                     resolved = ResolveUnique(existingCache, claimed, willMove, dir, item, candidate);
                     item.DstName = resolved;
@@ -349,7 +348,7 @@ namespace Com.Scm.Renamer
         private bool Evaluate(FileItem item)
         {
             item.DstName = string.Empty;
-            foreach (RenamerPattern pattern in this.patterns)
+            foreach (RenamePattern pattern in this.patterns)
             {
                 if (!pattern.GenName(item))
                 {

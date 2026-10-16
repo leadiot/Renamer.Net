@@ -47,13 +47,13 @@ namespace Com.Scm.Renamer
             Console.WriteLine();
 
             // 命令行参数：目录、表达式、冲突策略；未提供的项进入交互输入
-            string? dir = args.Length > 0 ? args[0] : null;
-            string? template = args.Length > 1 ? args[1] : null;
+            string dir = args.Length > 0 ? args[0] : null;
+            string template = args.Length > 1 ? args[1] : null;
             ConflictMode mode = ConflictMode.Fail;
             if (args.Length > 2)
             {
                 mode = args[2].Trim().Equals("auto", StringComparison.OrdinalIgnoreCase)
-                    ? ConflictMode.AutoSuffix
+                    ? ConflictMode.Auto
                     : ConflictMode.Fail;
             }
 
@@ -84,7 +84,7 @@ namespace Com.Scm.Renamer
             }
 
             // 3) 编译表达式（失败可重新输入）
-            Renamer? renamer = null;
+            Renamer renamer = null;
             while (renamer == null)
             {
                 try
@@ -153,7 +153,7 @@ namespace Com.Scm.Renamer
 
             // 6) 确认后提交
             Console.Write("确认对以上 {0} 个文件执行改名？(y/N)：", changeCount);
-            string? answer = Console.ReadLine();
+            string answer = Console.ReadLine();
             if (!string.Equals(answer?.Trim(), "y", StringComparison.OrdinalIgnoreCase))
             {
                 Console.WriteLine("已取消，未做任何修改。");
@@ -165,12 +165,12 @@ namespace Com.Scm.Renamer
             return result.Issues.Count == 0 ? 0 : 3;
         }
 
-        private static string? PromptDirectory()
+        private static string PromptDirectory()
         {
             while (true)
             {
                 Console.Write("请输入目录路径：");
-                string? input = Console.ReadLine();
+                string input = Console.ReadLine();
                 if (input == null || IsQuit(input))
                 {
                     return null;
@@ -216,7 +216,7 @@ namespace Com.Scm.Renamer
         /// <summary>
         /// 展示模板列表并等待用户选择；也可直接输入表达式（非数字内容视为表达式）。
         /// </summary>
-        private static string? PromptTemplateOrExpression(List<TemplateItem> templates)
+        private static string PromptTemplateOrExpression(List<TemplateItem> templates)
         {
             Console.WriteLine();
             if (templates.Count > 0)
@@ -235,7 +235,7 @@ namespace Com.Scm.Renamer
             while (true)
             {
                 Console.Write("输入模板序号或表达式：");
-                string? input = Console.ReadLine();
+                string input = Console.ReadLine();
                 if (input == null || IsQuit(input))
                 {
                     return null;
@@ -268,14 +268,14 @@ namespace Com.Scm.Renamer
             while (true)
             {
                 Console.Write("请选择 [1/2]（回车=1）：");
-                string? input = Console.ReadLine()?.Trim();
+                string input = Console.ReadLine()?.Trim();
                 if (string.IsNullOrEmpty(input) || input == "1")
                 {
                     return ConflictMode.Fail;
                 }
                 if (input == "2")
                 {
-                    return ConflictMode.AutoSuffix;
+                    return ConflictMode.Auto;
                 }
             }
         }
@@ -361,7 +361,7 @@ namespace Com.Scm.Renamer
             }
         }
 
-        private static bool IsQuit(string? input)
+        private static bool IsQuit(string input)
         {
             return string.Equals(input?.Trim(), "q", StringComparison.OrdinalIgnoreCase);
         }
@@ -369,7 +369,7 @@ namespace Com.Scm.Renamer
         /// <summary>
         /// 判断输入是否为帮助指令：help / --help / -h / /? / ? / ？，不区分大小写。
         /// </summary>
-        private static bool IsHelp(string? input)
+        private static bool IsHelp(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {

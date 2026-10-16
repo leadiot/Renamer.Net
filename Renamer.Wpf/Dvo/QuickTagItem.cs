@@ -1,12 +1,10 @@
-﻿using Com.Scm.Filexp.Rename.Dvo;
-
-namespace Com.Scm.Renamer.Dvo
+﻿namespace Com.Scm.Renamer.Dvo
 {
     public class QuickTagItem : ScmDvo
     {
-        private RenamerPattern _pattern;
+        private RenamePattern _pattern;
 
-        public RenamerPattern Pattern
+        public RenamePattern Pattern
         {
             get => _pattern;
             set

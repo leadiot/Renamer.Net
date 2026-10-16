@@ -1,7 +1,6 @@
-using Com.Scm.Filexp.Rename.Dvo;
-using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using Com.Scm.Renamer.Dto;
 using Com.Scm.Renamer.Dvo;
+using Com.Scm.Renamer.Patterns;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -505,7 +504,7 @@ namespace Com.Scm.Renamer
                 return;
             }
 
-            RenamePlan plan = renamer.Commit(coreItems, ConflictMode.AutoSuffix);
+            RenamePlan plan = renamer.Commit(coreItems, ConflictMode.Auto);
             for (int i = 0; i < coreItems.Count; i++)
             {
                 FileItems[i].ApplyCoreItem(coreItems[i]);
@@ -605,7 +604,7 @@ namespace Com.Scm.Renamer
 
         private void OnPatternTypeChosen(PatternType type, bool start)
         {
-            RenamerPattern pattern;
+            RenamePattern pattern;
             bool ok;
             switch (type)
             {
@@ -776,7 +775,7 @@ namespace Com.Scm.Renamer
                 return;
             }
 
-            renamer.Preview(coreItems, ConflictMode.AutoSuffix);
+            renamer.Preview(coreItems, ConflictMode.Auto);
         }
     }
 }

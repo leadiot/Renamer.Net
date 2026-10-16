@@ -1,41 +1,45 @@
-using Com.Scm.Renamer;
-
-namespace Com.Scm.Filexp.Rename.Dvo
+namespace Com.Scm.Renamer
 {
     /// <summary>
-    /// 表达式基类
+    /// 模式基类
     /// </summary>
-    public class RenamerPattern
+    public class RenamePattern
     {
+        /// <summary>
+        /// 模式起始标记
+        /// </summary>
         public const char PATTERN_START = '<';
+        /// <summary>
+        /// 模式结束标记
+        /// </summary>
         public const char PATTERN_END = '>';
 
         /// <summary>
-        /// 左起标识
+        /// 方向：左起标识
         /// </summary>
         public const char PATTERN_DIR_LEFT = '\\';
         /// <summary>
-        /// 右起标识
+        /// 方向：右起标识
         /// </summary>
         public const char PATTERN_DIR_RIGHT = '/';
-
-        /// <summary>
-        /// 转大写
-        /// </summary>
-        public const char PATTERN_OPT_UPPER = '\\';
-        /// <summary>
-        /// 转小写
-        /// </summary>
-        public const char PATTERN_OPT_LOWER = '/';
 
         /// <summary>
         /// 分隔标记
         /// </summary>
         public const char PATTERN_SPLIT = ':';
         /// <summary>
-        /// 转义
+        /// 转义标记
         /// </summary>
         public const char PATTERN_ESCAPE = '|';
+
+        /// <summary>
+        /// 操作：转大写
+        /// </summary>
+        public const char PATTERN_OPT_UPPER = '\\';
+        /// <summary>
+        /// 操作：转小写
+        /// </summary>
+        public const char PATTERN_OPT_LOWER = '/';
 
         /// <summary>
         /// 操作：追加
@@ -51,27 +55,33 @@ namespace Com.Scm.Filexp.Rename.Dvo
         public const char PATTERN_OPT_REPLACE = '\\';
 
         /// <summary>
-        /// 文件前缀
+        /// 标记：文件名
         /// </summary>
         public const string PATTERN_PREFIX = "*";
         /// <summary>
-        /// 文件后缀
+        /// 标记：扩展名
         /// </summary>
         public const string PATTERN_SUFFIX = "?";
         /// <summary>
-        /// 预留
+        /// 标记：点号
+        /// 有扩展名时输出点，无扩展名时输出空串
         /// </summary>
-        public const string PATTERN_RESERVED_1 = "\"";
+        public const string PATTERN_SEPARATOR = ".";
         /// <summary>
-        /// 数字
+        /// 标记：预留
+        /// </summary>
+        public const string PATTERN_RESERVED = "\"";
+
+        /// <summary>
+        /// 标记：数字
         /// </summary>
         public const string PATTERN_NUMBER = "|*";
         /// <summary>
-        /// 字母
+        /// 标记：字母
         /// </summary>
         public const string PATTERN_LETTER = "|?";
         /// <summary>
-        /// 时间表达式前缀
+        /// 标记：时间
         /// </summary>
         public const string PATTERN_TIME = "|\"";
         /// <summary>
@@ -90,14 +100,11 @@ namespace Com.Scm.Filexp.Rename.Dvo
         /// 文件访问时间（&lt;|"a&gt;）
         /// </summary>
         public const string PATTERN_TIME_ACCESS = "|\"a";
+
         /// <summary>
         /// 时间默认展示格式
         /// </summary>
         public const string PATTERN_TIME_DEFAULT_FORMAT = "yyyyMMddHHmmss";
-        /// <summary>
-        /// 条件分隔符 &lt;.&gt;：有扩展名时输出点，无扩展名时输出空串
-        /// </summary>
-        public const string PATTERN_SEPARATOR = ".";
 
         public PatternType Type { get; protected internal set; }
 

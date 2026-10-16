@@ -4,9 +4,9 @@ namespace Com.Scm.Renamer
     {
         None,
         /// <summary>
-        /// 文本
+        /// 条件分隔符（有扩展名时输出点）
         /// </summary>
-        Text,
+        Separator,
         /// <summary>
         /// 前缀
         /// </summary>
@@ -16,10 +16,6 @@ namespace Com.Scm.Renamer
         /// </summary>
         Suffix,
         /// <summary>
-        /// 时间
-        /// </summary>
-        Time,
-        /// <summary>
         /// 数字
         /// </summary>
         Number,
@@ -28,8 +24,12 @@ namespace Com.Scm.Renamer
         /// </summary>
         Letter,
         /// <summary>
-        /// 条件分隔符（有扩展名时输出点）
+        /// 文本
         /// </summary>
-        Separator,
+        Text,
+        /// <summary>
+        /// 时间
+        /// </summary>
+        Time,
     }
 }

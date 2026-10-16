@@ -1,28 +1,9 @@
-using Com.Scm.Filexp.Rename.Dvo;
-using Com.Scm.Filexp.Rename.Dvo.Pattern;
-using System;
+using Com.Scm.Renamer.Patterns;
 using System.Collections.Generic;
 using System.Globalization;
 
 namespace Com.Scm.Renamer
 {
-    /// <summary>
-    /// 模板解析错误。Position 为出错字符在整个模板中的 0 基位置。
-    /// </summary>
-    public class TemplateParseException : Exception
-    {
-        /// <summary>
-        /// 出错位置（0 基）
-        /// </summary>
-        public int Position { get; }
-
-        public TemplateParseException(string message, int position)
-            : base(message)
-        {
-            Position = position;
-        }
-    }
-
     /// <summary>
     /// 模板解析器：把模板扫描为“字面量 + 表达式”的 AST 片段列表。
     /// 表达式定界符 &lt; &gt; 是 Windows 文件名字符，天然不会出现在生成结果中，
@@ -33,9 +14,9 @@ namespace Com.Scm.Renamer
         /// <summary>
         /// 解析模板，返回按顺序排列的表达式片段。
         /// </summary>
-        public static List<RenamerPattern> Parse(string template)
+        public static List<RenamePattern> Parse(string template)
         {
-            var segments = new List<RenamerPattern>();
+            var segments = new List<RenamePattern>();
             if (string.IsNullOrEmpty(template))
             {
                 return segments;
@@ -45,7 +26,7 @@ namespace Com.Scm.Renamer
             int i = 0;
             while (i < template.Length)
             {
-                if (template[i] != RenamerPattern.PATTERN_START)
+                if (template[i] != RenamePattern.PATTERN_START)
                 {
                     i++;
                     continue;
@@ -57,7 +38,7 @@ namespace Com.Scm.Renamer
                     segments.Add(CreateText(template.Substring(literalStart, i - literalStart)));
                 }
 
-                int end = template.IndexOf(RenamerPattern.PATTERN_END, i + 1);
+                int end = template.IndexOf(RenamePattern.PATTERN_END, i + 1);
                 if (end < 0)
                 {
                     throw new TemplateParseException("表达式缺少结束符 >", i);
@@ -87,29 +68,29 @@ namespace Com.Scm.Renamer
             };
         }
 
-        private static RenamerPattern ParseExpression(string body, int bodyPos, string raw)
+        private static RenamePattern ParseExpression(string body, int bodyPos, string raw)
         {
             if (body.Length == 0)
             {
                 throw new TemplateParseException("表达式内容为空", bodyPos);
             }
 
-            RenamerPattern pattern;
+            RenamePattern pattern;
             char first = body[0];
 
-            if (first == RenamerPattern.PATTERN_PREFIX[0])
+            if (first == RenamePattern.PATTERN_PREFIX[0])
             {
                 var p = new NamePrefixPattern();
                 p.Decode(body, bodyPos);
                 pattern = p;
             }
-            else if (first == RenamerPattern.PATTERN_SUFFIX[0])
+            else if (first == RenamePattern.PATTERN_SUFFIX[0])
             {
                 var p = new NameSuffixPattern();
                 p.Decode(body, bodyPos);
                 pattern = p;
             }
-            else if (first == RenamerPattern.PATTERN_ESCAPE)
+            else if (first == RenamePattern.PATTERN_ESCAPE)
             {
                 if (body.Length < 2)
                 {
@@ -144,11 +125,11 @@ namespace Com.Scm.Renamer
                             "无法识别的表达式类型（|* 数字、|? 字母、|\" 时间）", bodyPos + 1);
                 }
             }
-            else if (body == RenamerPattern.PATTERN_SEPARATOR)
+            else if (body == RenamePattern.PATTERN_SEPARATOR)
             {
                 pattern = new SeparatorPattern();
             }
-            else if (first == RenamerPattern.PATTERN_SEPARATOR[0])
+            else if (first == RenamePattern.PATTERN_SEPARATOR[0])
             {
                 throw new TemplateParseException(
                     "条件分隔符只能是 <.>（点号后不能有其他字符）", bodyPos + 1);
