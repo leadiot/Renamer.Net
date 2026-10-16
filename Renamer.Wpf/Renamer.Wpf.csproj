@@ -7,7 +7,12 @@
     <UseWPF>true</UseWPF>
     <Nullable>disable</Nullable>
     <RootNamespace>Com.Scm.Renamer</RootNamespace>
+    <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\logo.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Renamer.Net\Renamer.Net.csproj" />

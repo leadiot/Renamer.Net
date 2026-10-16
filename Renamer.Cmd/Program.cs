@@ -9,8 +9,19 @@ namespace Com.Scm.Renamer
     /// 仅处理目录下的直接文件（不递归子目录）。
     /// 也支持命令行参数：Renamer.Cmd &lt;目录&gt; &lt;表达式&gt; [冲突策略 fail|auto]
     /// </summary>
-    internal static class Program
+    public static class Program
     {
+        public const int MAJOR = 1;
+
+        public const int MINOR = 0;
+
+        public const int PATCH = 0;
+
+        public const int BUILD = 1;
+
+        public static readonly string VersionCode = $"{MAJOR}.{MINOR}.{PATCH}.{BUILD}";
+        public static readonly string VersionDate = "20261006";
+
         private static int Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;

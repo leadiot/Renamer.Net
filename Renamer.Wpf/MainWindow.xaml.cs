@@ -3,7 +3,9 @@ using Com.Scm.Filexp.Rename.Dvo.Pattern;
 using Com.Scm.Renamer.Dto;
 using Com.Scm.Renamer.Dvo;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +15,7 @@ namespace Com.Scm.Renamer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : HandyControl.Controls.Window
     {
         public ObservableCollection<FileItemDvo> FileItems { get; } = new();
         public ObservableCollection<QuickTagItem> QuickTags { get; } = new();
@@ -147,6 +149,48 @@ namespace Com.Scm.Renamer
             else
             {
                 System.Windows.MessageBox.Show("未找到模板文件 template.json", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// 应用菜单：打开标题栏下拉菜单
+        /// </summary>
+        private void BtAppMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && Resources["AppMenu"] is System.Windows.Controls.ContextMenu menu)
+            {
+                menu.PlacementTarget = fe;
+                menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                menu.IsOpen = true;
+            }
+        }
+
+        /// <summary>
+        /// 应用菜单：关于
+        /// </summary>
+        private void MiAbout_Click(object sender, RoutedEventArgs e)
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            System.Windows.MessageBox.Show(
+                $"文件更名（Renamer.Net）\n版本：v{version}",
+                "关于",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// 应用菜单：打开项目首页
+        /// </summary>
+        private void MiHomepage_Click(object sender, RoutedEventArgs e)
+        {
+            const string url = "https://gitee.com/leadiot/renamer.net";
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch
+            {
+                System.Windows.MessageBox.Show("无法打开浏览器，请手动访问：" + url, "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

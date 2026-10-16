@@ -1,21 +1,54 @@
-<Window x:Class="Com.Scm.Renamer.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Com.Scm.Renamer.Convert"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
-        mc:Ignorable="d"
-        Title="文件更名" Height="640" Width="920"
-        Background="{StaticResource AppCanvasBrush}"
-        WindowStartupLocation="CenterScreen">
-    <Window.Resources>
+<hc:Window
+    x:Class="Com.Scm.Renamer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:Com.Scm.Renamer.Convert"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    mc:Ignorable="d"
+    Title="文件更名"
+    Height="640" Width="920"
+    Background="{StaticResource AppCanvasBrush}"
+    ShowTitle="False"
+    WindowStartupLocation="CenterScreen">
+    <hc:Window.Resources>
+        <Geometry x:Key="MenuGeometry">M3,5 H21 V7 H3 Z M3,11 H21 V13 H3 Z M3,17 H21 V19 H3 Z</Geometry>
+        <ContextMenu x:Key="AppMenu">
+            <MenuItem Header="关于" Click="MiAbout_Click"/>
+            <MenuItem Header="项目首页" Click="MiHomepage_Click"/>
+        </ContextMenu>
         <local:WidthOffsetConverter x:Key="WidthOffsetConverter"/>
-    </Window.Resources>
+    </hc:Window.Resources>
+
+    <hc:Window.NonClientAreaContent>
+        <Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0">
+                <TextBlock Text="文件更名"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"
+                       Margin="8,0,0,0"
+                       Foreground="{StaticResource PrimaryTextBrush}"/>
+                <TextBlock Text="基于表达式的文件批量更名工具"
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       Margin="10,1,0,0"
+                       Foreground="{StaticResource ThirdlyTextBrush}"/>
+            </StackPanel>
+            <Button x:Name="BtAppMenu"
+                    Padding="8"
+                    Style="{StaticResource ButtonIcon}"
+                    HorizontalAlignment="Right"
+                    hc:IconElement.Geometry="{StaticResource MenuGeometry}"
+                    Foreground="{StaticResource PrimaryTextBrush}"
+                    ToolTip="菜单"
+                    Click="BtAppMenu_Click"/>
+        </Grid>
+    </hc:Window.NonClientAreaContent>
 
     <Grid Margin="22,20,22,16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,26 +56,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 标题区 -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,16">
-            <Border Width="12" Height="12" CornerRadius="6"
-                    Background="{StaticResource PrimaryBrush}"
-                    VerticalAlignment="Center"
-                    Margin="0,0,10,2"/>
-            <StackPanel>
-                <TextBlock Text="文件更名"
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource PrimaryTextBrush}"/>
-                <TextBlock Text="用表达式批量、可预览地重命名文件"
-                           FontSize="12"
-                           Margin="0,3,0,0"
-                           Foreground="{StaticResource ThirdlyTextBrush}"/>
-            </StackPanel>
-        </StackPanel>
-
         <!-- 表达式卡片 -->
-        <Border Grid.Row="1"
+        <Border Grid.Row="0"
                 Background="{StaticResource CardBrush}"
                 BorderBrush="{StaticResource CardBorderBrush}"
                 BorderThickness="1"
@@ -78,7 +93,7 @@
         </Border>
 
         <!-- 快捷表达式列表 -->
-        <Grid Grid.Row="2" Margin="0,0,0,14" HorizontalAlignment="Center">
+        <Grid Grid.Row="1" Margin="0,0,0,14" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -149,7 +164,7 @@
         </Grid>
 
         <!-- 工具栏 -->
-        <Grid Grid.Row="3" Margin="0,0,0,14">
+        <Grid Grid.Row="2" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <hc:ButtonGroup>
                     <Button x:Name="BtAddDir"
@@ -186,7 +201,7 @@
         </Grid>
 
         <!-- 结果卡片 -->
-        <Border Grid.Row="4"
+        <Border Grid.Row="3"
                 Background="{StaticResource CardBrush}"
                 BorderBrush="{StaticResource CardBorderBrush}"
                 BorderThickness="1"
@@ -241,7 +256,7 @@
         </Border>
 
         <!-- 状态栏 -->
-        <Grid Grid.Row="5" Margin="4,14,4,0">
+        <Grid Grid.Row="4" Margin="4,14,4,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <TextBlock Text="已选择"
                            FontSize="13"
@@ -266,4 +281,4 @@
                        VerticalAlignment="Center"/>
         </Grid>
     </Grid>
-</Window>
+</hc:Window>

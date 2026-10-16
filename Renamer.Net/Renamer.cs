@@ -13,6 +13,17 @@ namespace Com.Scm.Renamer
     /// </summary>
     public class Renamer
     {
+        public const int MAJOR = 1;
+
+        public const int MINOR = 0;
+
+        public const int PATCH = 0;
+
+        public const int BUILD = 1;
+
+        public static readonly string VersionCode = $"{MAJOR}.{MINOR}.{PATCH}.{BUILD}";
+        public static readonly string VersionDate = "20261006";
+
         /// <summary>
         /// 临时名前缀，用于两阶段改名中标识中间状态文件。
         /// </summary>
