@@ -177,21 +177,11 @@ namespace Com.Scm.Renamer
         private static readonly string TempPrefix = ".__renamer_tmp_";
 
         /// <summary>
-        /// 单文件改名步骤记录（原名 → 临时名 → 最终名），用于两阶段提交与回滚。
-        /// </summary>
-        private class RenameStep
-        {
-            public FileItem Item;
-            public string OriginalPath;
-            public string TempPath;
-            public string FinalPath;
-        }
-
-        /// <summary>
         /// 预览通过后提交磁盘改名。采用两阶段策略：
         /// Phase 1：每个文件在其所在目录内改名为唯一临时名（消解循环改名链 a↔b）；
         /// Phase 2：再从临时名改到最终名。
         /// Phase 1 任一失败则整体回滚；Phase 2 失败尽力回退到原名并上报。
+        /// 临时名暂存在 <see cref="FileItem.TmpName"/>，完成后清空。
         /// </summary>
         public RenamePlan Commit(List<FileItem> fileList, ConflictMode mode = ConflictMode.Fail)
         {
@@ -201,7 +191,7 @@ namespace Com.Scm.Renamer
                 return plan;
             }
 
-            var steps = new List<RenameStep>();
+            var workItems = new List<FileItem>();
             foreach (FileItem item in plan.Items)
             {
                 if (item.Status == RenameStatus.NoChange || item.Status == RenameStatus.Error)
@@ -222,50 +212,51 @@ namespace Com.Scm.Renamer
                     continue;
                 }
 
-                steps.Add(new RenameStep
-                {
-                    Item = item,
-                    OriginalPath = item.Path,
-                    TempPath = Path.Combine(dir, GenerateTempName(dir, item.Path)),
-                    FinalPath = finalPath,
-                });
+                item.TmpName = GenerateTempName(dir, item.Path);
+                workItems.Add(item);
             }
 
-            if (steps.Count == 0)
+            if (workItems.Count == 0)
             {
                 return plan;
             }
 
             // Phase 1：原 → 临时名
-            foreach (var step in steps)
+            foreach (var item in workItems)
             {
+                string dir = Path.GetDirectoryName(item.Path);
+                string tempPath = Path.Combine(dir, item.TmpName);
                 try
                 {
-                    File.Move(step.OriginalPath, step.TempPath);
+                    File.Move(item.Path, tempPath);
                 }
                 catch (Exception ex)
                 {
-                    RollbackPhase1(steps);
-                    AddError(plan, step.Item, IssueKind.IoError, "改名失败（阶段1）：" + ex.Message, step.TempPath);
+                    RollbackPhase1(workItems);
+                    AddError(plan, item, IssueKind.IoError, "改名失败（阶段1）：" + ex.Message, tempPath);
                     return plan;
                 }
             }
 
             // Phase 2：临时名 → 最终名
-            foreach (var step in steps)
+            foreach (var item in workItems)
             {
+                string dir = Path.GetDirectoryName(item.Path);
+                string tempPath = Path.Combine(dir, item.TmpName);
+                string finalPath = Path.Combine(dir, item.DstName);
                 try
                 {
-                    File.Move(step.TempPath, step.FinalPath);
-                    step.Item.Path = step.FinalPath;
-                    step.Item.Status = RenameStatus.Ok;
+                    File.Move(tempPath, finalPath);
+                    item.Path = finalPath;
+                    item.Status = RenameStatus.Ok;
+                    item.TmpName = null;
                 }
                 catch (Exception ex)
                 {
-                    AddError(plan, step.Item, IssueKind.IoError,
-                        "改名失败（阶段2）：" + ex.Message + "，文件当前位于：" + step.TempPath,
-                        step.FinalPath);
-                    TryRestoreToOriginal(step);
+                    AddError(plan, item, IssueKind.IoError,
+                        "改名失败（阶段2）：" + ex.Message + "，文件当前位于：" + tempPath,
+                        finalPath);
+                    TryRestoreToOriginal(item);
                 }
             }
 
@@ -292,15 +283,21 @@ namespace Com.Scm.Renamer
         /// Phase 1 失败回滚：把所有已改名到临时名的文件还原为原名。
         /// 此时所有原名均未被占用，回滚安全。
         /// </summary>
-        private static void RollbackPhase1(List<RenameStep> steps)
+        private static void RollbackPhase1(List<FileItem> workItems)
         {
-            foreach (var step in steps)
+            foreach (var item in workItems)
             {
-                if (File.Exists(step.TempPath) && !File.Exists(step.OriginalPath))
+                if (string.IsNullOrEmpty(item.TmpName))
+                {
+                    continue;
+                }
+                string dir = Path.GetDirectoryName(item.Path);
+                string tempPath = Path.Combine(dir, item.TmpName);
+                if (File.Exists(tempPath) && !File.Exists(item.Path))
                 {
                     try
                     {
-                        File.Move(step.TempPath, step.OriginalPath);
+                        File.Move(tempPath, item.Path);
                     }
                     catch
                     {
@@ -313,23 +310,29 @@ namespace Com.Scm.Renamer
         /// <summary>
         /// Phase 2 失败后尽力把文件从临时名还原为原名；若原名已被占用则放弃，保留临时名。
         /// </summary>
-        private static void TryRestoreToOriginal(RenameStep step)
+        private static void TryRestoreToOriginal(FileItem item)
         {
-            if (!File.Exists(step.TempPath))
+            if (string.IsNullOrEmpty(item.TmpName))
             {
                 return;
             }
-            if (File.Exists(step.OriginalPath))
+            string dir = Path.GetDirectoryName(item.Path);
+            string tempPath = Path.Combine(dir, item.TmpName);
+            if (!File.Exists(tempPath))
+            {
+                return;
+            }
+            if (File.Exists(item.Path))
             {
                 return; // 原名已被其他改名结果占用，无法回退
             }
             try
             {
-                File.Move(step.TempPath, step.OriginalPath);
+                File.Move(tempPath, item.Path);
             }
             catch
             {
-                // 保留在 TempPath，由用户处理
+                // 保留在临时名，由用户处理
             }
         }
 

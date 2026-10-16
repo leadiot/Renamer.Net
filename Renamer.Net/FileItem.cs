@@ -35,7 +35,7 @@ namespace Com.Scm.Renamer
         DateTime LastAccessTime { get; set; }
 
         /// <summary>
-        /// 临时名称
+        /// 两阶段改名中的临时文件名（仅 Commit 阶段使用，完成后清空）
         /// </summary>
         string TmpName { get; set; }
 

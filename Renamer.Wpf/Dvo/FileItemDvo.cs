@@ -1,4 +1,4 @@
-﻿namespace Com.Scm.Renamer.Dvo
+namespace Com.Scm.Renamer.Dvo
 {
     public class FileItemDvo : ScmDvo, FileItem
     {
@@ -15,8 +15,6 @@
         private string srcName;
         public string SrcName { get { return srcName; } set { srcName = value; OnPropertyChanged(nameof(SrcName)); } }
 
-        public string TmpName { get; set; }
-
         private string dstName;
         public string DstName { get { return dstName; } set { dstName = value; OnPropertyChanged(nameof(DstName)); } }
 
@@ -32,6 +30,14 @@
         {
             get => issueMessage;
             set { issueMessage = value; OnPropertyChanged(nameof(IssueMessage)); }
+        }
+
+        private string tmpName = string.Empty;
+
+        public string TmpName
+        {
+            get => tmpName;
+            set { tmpName = value; OnPropertyChanged(nameof(TmpName)); }
         }
 
         public FileItem ToItem()
