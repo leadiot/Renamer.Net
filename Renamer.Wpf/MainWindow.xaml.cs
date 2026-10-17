@@ -30,6 +30,12 @@ namespace Com.Scm.Renamer
         {
             QuickTagList.ItemsSource = QuickTags;
             GdResult.ItemsSource = FileItems;
+
+            CbNumberingOrder.ItemsSource = new[] { "按列表顺序", "按名称", "按修改时间", "按创建时间", "按访问时间" };
+            CbNumberingOrder.SelectedIndex = 0;
+            CbNumberingDirection.ItemsSource = new[] { "升序", "降序" };
+            CbNumberingDirection.SelectedIndex = 0;
+            CbNumberingDirection.IsEnabled = false;
         }
 
         private void InitData()
@@ -504,6 +510,7 @@ namespace Com.Scm.Renamer
                 return;
             }
 
+            renamer.Numbering = GetNumberingOptions();
             RenamePlan plan = renamer.Commit(coreItems, ConflictMode.Auto);
             for (int i = 0; i < coreItems.Count; i++)
             {
@@ -775,7 +782,39 @@ namespace Com.Scm.Renamer
                 return;
             }
 
+            renamer.Numbering = GetNumberingOptions();
             renamer.Preview(coreItems, ConflictMode.Auto);
+            foreach (FileItemDvo item in FileItems)
+            {
+                item.ApplyCoreItem(item);
+            }
+        }
+
+        private void NumberingOption_Changed(object sender, RoutedEventArgs e)
+        {
+            if (CbNumberingDirection != null && CbNumberingOrder != null)
+            {
+                CbNumberingDirection.IsEnabled = CbNumberingOrder.SelectedIndex > 0;
+            }
+            RunPreview();
+        }
+
+        private NumberingOptions GetNumberingOptions()
+        {
+            var opt = new NumberingOptions
+            {
+                Ascending = CbNumberingDirection.SelectedIndex != 1,
+                ResetPerDirectory = CbResetPerDir.IsChecked == true
+            };
+            switch (CbNumberingOrder.SelectedIndex)
+            {
+                case 1: opt.OrderBy = NumberingOrderBy.Name; break;
+                case 2: opt.OrderBy = NumberingOrderBy.LastWriteTime; break;
+                case 3: opt.OrderBy = NumberingOrderBy.CreationTime; break;
+                case 4: opt.OrderBy = NumberingOrderBy.LastAccessTime; break;
+                default: opt.OrderBy = NumberingOrderBy.None; break;
+            }
+            return opt;
         }
     }
 }

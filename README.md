@@ -6,8 +6,9 @@
 
 - **一行表达式描述命名规则**：字面量与 `<...>` 表达式交替组合，覆盖名称/扩展名引用、大小写转换、管道函数（upper/lower/rep/cut/ins/del）、数字与字母序列、文件时间戳、条件分隔符等七类模式。
 - **三段式安全流程**：`Compile` 编译校验（错误带精确字符位置）→ `Preview` 只读预览（检测重名、占用、非法字符等冲突，绝不触碰磁盘）→ `Commit` 提交改名。
-- **冲突策略**：`Fail` 遇冲突即中止；`Auto` 自动追加 ` (n)` 后缀消解。
+- **冲突策略**：`Fail` 遇冲突即中止；`AutoSuffix` 自动追加 ` (n)` 后缀消解。
 - **两阶段提交**：循环/链式改名（如 `a→b` 且 `b→a`）通过同目录临时文件名两阶段安全落地，失败自动回滚。
+- **发号策略**：默认按传入列表顺序发号；支持按名称（自然排序）/时间排序发号，以及按目录复位流水号（每目录独立发号）。
 - **双前端**：`Renamer.Cmd` 命令行版（交互 + 参数两种模式，内置帮助）；`Renamer.Wpf` 图形界面版（HandyControl，可视化编辑器 + 预览表格）。
 - **可嵌入**：核心库 `Renamer.Net` 面向 `netstandard2.0`，可在任意 .NET 程序中调用。
 
@@ -55,12 +56,19 @@ dotnet run --project Renamer.Wpf
 # 查看表达式使用说明
 Renamer.Cmd help
 
-# 参数直调：目录 表达式 [冲突策略 fail|auto]
-Renamer.Cmd "D:\Photos" "IMAGE_<|*4><.><?>" auto
+# 参数直调：目录 表达式 [冲突策略 fail|auto] [发号选项]
+Renamer.Cmd "D:\Photos" "IMAGE_<|*4><.><?>" auto name,asc,reset
 
-# 交互模式（依次输入目录、选择模板/输入表达式、选择冲突策略）
+# 交互模式（依次输入目录、选择模板/输入表达式、选择冲突策略、发号选项）
 Renamer.Cmd
 ```
+
+发号选项格式：`none|name|mtime|ctime|atime[,asc|desc][,reset]`。
+
+- `name` 按主文件名自然排序（数字段按数值比较，如 2 在 10 前）
+- `mtime` / `ctime` / `atime` 按修改 / 创建 / 访问时间排序
+- `asc` / `desc` 排序方向（默认升序）
+- `reset` 按目录复位：每个目录各自从起始值发号
 
 交互输入 `help` / `?` 可随时查看表达式使用说明，输入 `q` 退出。
 
@@ -112,12 +120,20 @@ using Com.Scm.Renamer;
 // 1. 编译
 Renamer renamer = Renamer.Compile("IMAGE_<|*4><.><?>");
 
+// 可选：配置发号策略（默认按传入列表顺序全局发号）
+renamer.Numbering = new NumberingOptions
+{
+    OrderBy = NumberingOrderBy.Name,       // 按主文件名自然排序
+    Ascending = true,                       // 升序
+    ResetPerDirectory = true               // 按目录各自复位
+};
+
 // 2. 预览（只读，不触碰磁盘）
-RenamePlan plan = renamer.Preview(files, ConflictMode.Auto);
+RenamePlan plan = renamer.Preview(files, ConflictMode.AutoSuffix);
 if (!plan.CanCommit) { /* 处理 plan.Issues */ }
 
-// 3. 提交
-RenamePlan result = renamer.Commit(files, ConflictMode.Auto);
+// 3. 提交（Preview 与 Commit 共用同一 Numbering 设置，编号一致）
+RenamePlan result = renamer.Commit(files, ConflictMode.AutoSuffix);
 ```
 
 - `Compile` 失败抛出 `TemplateParseException`，含 `Position`（出错字符的 0 基位置）。
@@ -126,7 +142,6 @@ RenamePlan result = renamer.Commit(files, ConflictMode.Auto);
 ## 已知限制与后续路线
 
 - 暂不支持正则替换；`rep` 管道的查找文本不能含 `|`（可用旧式文字替换 `<*查找|替换>` 临时替代）。
-- 流水序号按传入列表顺序发号，尚不支持按名称/时间排序发号、按目录复位。
 - 交换式改名链已通过临时文件名两阶段方案解决，批次整体非原子操作。
 
 ## 许可证

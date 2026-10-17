@@ -2,12 +2,14 @@ using Com.Scm.Renamer.Pattern;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Com.Scm.Renamer
 {
     /// <summary>
     /// 批量重命名执行器：模板编译一次，按文件顺序逐一生成 DstName。
-    /// 数字/字母流水依据 FileItem.Index（本批次中的 0 基序号）计算。
+    /// 数字/字母流水依据 FileItem.Index 计算；Index 的分配由 <see cref="Numbering"/> 决定，
+    /// 缺省为按传入列表顺序全局连续发号，可配置为按名称/时间排序发号、按目录复位。
     /// 标准流程：Compile → Preview（冲突检测）→ Commit（提交磁盘改名）。
     /// </summary>
     public class Renamer
@@ -29,6 +31,12 @@ namespace Com.Scm.Renamer
         private static readonly string TempPrefix = ".__renamer_tmp_";
 
         private readonly List<RenamePattern> _Patterns = new List<RenamePattern>();
+
+        /// <summary>
+        /// 流水发号策略；为 null 时按传入列表顺序全局连续发号（原有行为）。
+        /// Preview 与 Commit 共用该设置，保证预览与提交的编号一致。
+        /// </summary>
+        public NumberingOptions Numbering { get; set; }
 
         public void Add(RenamePattern pattern)
         {
@@ -75,15 +83,15 @@ namespace Com.Scm.Renamer
             var existingCache = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             var claimed = new Dictionary<string, Dictionary<string, FileItem>>(StringComparer.OrdinalIgnoreCase);
 
+            // 发号计划：预载文件时间，按 Numbering 分配 Index（排序/目录复位在此生效）
+            ApplyNumbering(fileList);
+
             // Pass 1：对全部文件求值（单项失败不影响其余）
             for (int k = 0; k < fileList.Count; k++)
             {
                 FileItem item = fileList[k];
-                item.Index = k;
                 item.IssueMessage = null;
                 item.Status = RenameStatus.Ok;
-
-                LoadTimes(item);
 
                 try
                 {
@@ -362,6 +370,118 @@ namespace Com.Scm.Renamer
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// 发号计划：预载全部文件时间，按 <see cref="Numbering"/> 决定发号顺序并分配 FileItem.Index。
+        /// 只重排"发号视图"，不改动调用方列表顺序；OrderBy 为稳定排序，key 相同保持原相对顺序，
+        /// 保证多次预览结果确定、可复现。
+        /// </summary>
+        private void ApplyNumbering(List<FileItem> fileList)
+        {
+            foreach (FileItem item in fileList)
+            {
+                LoadTimes(item);
+            }
+
+            NumberingOptions opt = Numbering;
+            if (opt == null || (opt.OrderBy == NumberingOrderBy.None && !opt.ResetPerDirectory))
+            {
+                for (int k = 0; k < fileList.Count; k++)
+                {
+                    fileList[k].Index = k;
+                }
+                return;
+            }
+
+            IEnumerable<FileItem> ordered = fileList;
+            if (opt.OrderBy != NumberingOrderBy.None)
+            {
+                ordered = SortForNumbering(fileList, opt);
+            }
+
+            if (opt.ResetPerDirectory)
+            {
+                // 目录内各自从 0 发号；目录 key 大小写不敏感，与冲突检测的目录分组保持一致
+                var counters = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                foreach (FileItem item in ordered)
+                {
+                    string key = GetDirectory(item) ?? "\0virtual";
+                    int rank;
+                    counters.TryGetValue(key, out rank);
+                    item.Index = rank;
+                    counters[key] = rank + 1;
+                }
+            }
+            else
+            {
+                int rank = 0;
+                foreach (FileItem item in ordered)
+                {
+                    item.Index = rank++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 按选项构造发号顺序：名称用自然排序（数字段按数值比较）；
+        /// 时间排序中路径不可读的文件恒排末尾，与方向无关。
+        /// </summary>
+        private static IEnumerable<FileItem> SortForNumbering(List<FileItem> fileList, NumberingOptions opt)
+        {
+            switch (opt.OrderBy)
+            {
+                case NumberingOrderBy.Name:
+                    return opt.Ascending
+                        ? fileList.OrderBy(GetNameKey, NaturalNameComparer.Instance)
+                        : fileList.OrderByDescending(GetNameKey, NaturalNameComparer.Instance);
+                case NumberingOrderBy.CreationTime:
+                case NumberingOrderBy.LastWriteTime:
+                case NumberingOrderBy.LastAccessTime:
+                    return fileList.OrderBy(item => GetTimeKey(item, opt.OrderBy), new TimeKeyComparer(opt.Ascending));
+                default:
+                    return fileList;
+            }
+        }
+
+        /// <summary>
+        /// 名称排序 key：不含扩展名的主文件名。
+        /// </summary>
+        private static string GetNameKey(FileItem item)
+        {
+            string src = item.SrcName;
+            if (string.IsNullOrEmpty(src) && !string.IsNullOrEmpty(item.Path))
+            {
+                src = Path.GetFileName(item.Path);
+            }
+            if (string.IsNullOrEmpty(src))
+            {
+                return string.Empty;
+            }
+            string baseName;
+            string ext;
+            NamePattern.SplitName(src, out baseName, out ext);
+            return baseName;
+        }
+
+        /// <summary>
+        /// 时间排序 key：路径不可读时返回 null（由 TimeKeyComparer 排到末尾）。
+        /// </summary>
+        private static DateTime? GetTimeKey(FileItem item, NumberingOrderBy orderBy)
+        {
+            if (string.IsNullOrEmpty(item.Path) || !File.Exists(item.Path))
+            {
+                return null;
+            }
+            switch (orderBy)
+            {
+                case NumberingOrderBy.CreationTime:
+                    return item.CreationTime;
+                case NumberingOrderBy.LastAccessTime:
+                    return item.LastAccessTime;
+                default:
+                    return item.LastWriteTime;
+            }
         }
 
         /// <summary>

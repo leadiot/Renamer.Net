@@ -7,7 +7,7 @@ namespace Com.Scm.Renamer
     ///   3) 只读预览（Preview）并展示 原名 -> 新名、问题与自动消解警告
     ///   4) 确认后提交磁盘改名（Commit）
     /// 仅处理目录下的直接文件（不递归子目录）。
-    /// 也支持命令行参数：Renamer.Cmd &lt;目录&gt; &lt;表达式&gt; [冲突策略 fail|auto]
+    /// 也支持命令行参数：Renamer.Cmd &lt;目录&gt; &lt;表达式&gt; [冲突策略 fail|auto] [发号选项 none|name|mtime|ctime|atime[,asc|desc][,reset]]
     /// 首参数为 help / --help / -h / /? 时输出表达式使用说明并退出；
     /// 交互输入 help / ? / ？亦可随时查看。
     /// </summary>
@@ -110,6 +110,17 @@ namespace Com.Scm.Renamer
                 mode = PromptConflictMode();
             }
 
+            // 5) 流水发号选项（命令行第 4 参数，或交互输入）
+            NumberingOptions numbering = null;
+            if (args.Length > 3)
+            {
+                numbering = ParseNumbering(args[3]);
+            }
+            else if (args.Length <= 2)
+            {
+                numbering = PromptNumbering();
+            }
+
             // 收集目录下的直接文件
             var files = Directory
                 .EnumerateFiles(dir)
@@ -129,6 +140,11 @@ namespace Com.Scm.Renamer
             {
                 Console.WriteLine("目录下没有文件：" + dir);
                 return 0;
+            }
+
+            if (numbering != null)
+            {
+                renamer.Numbering = numbering;
             }
 
             // 5) 预览（只读，不触碰磁盘）
@@ -383,6 +399,107 @@ namespace Com.Scm.Renamer
                 || text.Equals("/?", StringComparison.OrdinalIgnoreCase)
                 || text == "?"
                 || text == "？";
+        }
+
+        /// <summary>
+        /// 交互方式让用户选择流水发号选项。
+        /// </summary>
+        private static NumberingOptions PromptNumbering()
+        {
+            Console.WriteLine();
+            Console.WriteLine("流水发号顺序：");
+            Console.WriteLine("  1) 按列表顺序（默认）");
+            Console.WriteLine("  2) 按名称（自然排序：数字段按数值比较）");
+            Console.WriteLine("  3) 按修改时间");
+            Console.WriteLine("  4) 按创建时间");
+            Console.WriteLine("  5) 按访问时间");
+            while (true)
+            {
+                Console.Write("请选择 [1-5]（回车=1）：");
+                string input = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(input))
+                {
+                    input = "1";
+                }
+                if (!int.TryParse(input, out int opt) || opt < 1 || opt > 5)
+                {
+                    continue;
+                }
+
+                var numbering = new NumberingOptions();
+                switch (opt)
+                {
+                    case 2: numbering.OrderBy = NumberingOrderBy.Name; break;
+                    case 3: numbering.OrderBy = NumberingOrderBy.LastWriteTime; break;
+                    case 4: numbering.OrderBy = NumberingOrderBy.CreationTime; break;
+                    case 5: numbering.OrderBy = NumberingOrderBy.LastAccessTime; break;
+                    default: numbering.OrderBy = NumberingOrderBy.None; break;
+                }
+
+                if (numbering.OrderBy != NumberingOrderBy.None)
+                {
+                    Console.Write("方向 [1 升序/2 降序]（回车=1）：");
+                    string dir = Console.ReadLine()?.Trim();
+                    numbering.Ascending = dir != "2";
+                }
+
+                Console.Write("流水号按目录复位（多目录批次各自从起始值发号）？(y/N)：");
+                string reset = Console.ReadLine()?.Trim();
+                numbering.ResetPerDirectory = string.Equals(reset, "y", StringComparison.OrdinalIgnoreCase);
+                return numbering;
+            }
+        }
+
+        /// <summary>
+        /// 解析命令行第 4 个参数（发号选项）。
+        /// 格式：none|name|mtime|ctime|atime[,asc|desc][,reset]
+        /// </summary>
+        private static NumberingOptions ParseNumbering(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            string[] parts = value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0)
+            {
+                return null;
+            }
+
+            var opt = new NumberingOptions();
+            string order = parts[0].Trim().ToLowerInvariant();
+            switch (order)
+            {
+                case "none": opt.OrderBy = NumberingOrderBy.None; break;
+                case "name": opt.OrderBy = NumberingOrderBy.Name; break;
+                case "mtime": opt.OrderBy = NumberingOrderBy.LastWriteTime; break;
+                case "ctime": opt.OrderBy = NumberingOrderBy.CreationTime; break;
+                case "atime": opt.OrderBy = NumberingOrderBy.LastAccessTime; break;
+                default:
+                    Console.WriteLine("警告：无效的发号排序 '{0}'，已忽略。有效值：none|name|mtime|ctime|atime", order);
+                    return null;
+            }
+
+            if (parts.Length > 1)
+            {
+                string dir = parts[1].Trim().ToLowerInvariant();
+                if (dir == "desc")
+                {
+                    opt.Ascending = false;
+                }
+            }
+
+            if (parts.Length > 2)
+            {
+                string reset = parts[2].Trim().ToLowerInvariant();
+                if (reset == "reset")
+                {
+                    opt.ResetPerDirectory = true;
+                }
+            }
+
+            return opt;
         }
 
         /// <summary>

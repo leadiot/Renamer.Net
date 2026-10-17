@@ -192,6 +192,26 @@
                         Padding="20,0,20,0"
                         Style="{StaticResource ButtonDanger}"
                         Click="BtExecute_Click"/>
+                <Border Width="1" Height="20" Margin="14,0,14,0"
+                        Background="{StaticResource SecondaryBorderBrush}"
+                        VerticalAlignment="Center"/>
+                <ComboBox x:Name="CbNumberingOrder"
+                          Width="118"
+                          VerticalAlignment="Center"
+                          ToolTip="流水发号顺序"
+                          SelectionChanged="NumberingOption_Changed"/>
+                <ComboBox x:Name="CbNumberingDirection"
+                          Width="66"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          ToolTip="排序方向"
+                          SelectionChanged="NumberingOption_Changed"/>
+                <CheckBox x:Name="CbResetPerDir"
+                          Content="按目录复位"
+                          VerticalAlignment="Center"
+                          Margin="10,0,0,0"
+                          ToolTip="多目录批次各自从起始值发号"
+                          Click="NumberingOption_Changed"/>
             </StackPanel>
             <Button x:Name="BtExport"
                     Content="导出"
